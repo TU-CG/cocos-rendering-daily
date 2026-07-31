@@ -1,0 +1,21 @@
+{
+  "tags": [
+    { "id": "render-pipeline", "label": "渲染流程", "color": "#007f82" },
+    { "id": "camera-ui", "label": "相机与 UI", "color": "#306fa4" },
+    { "id": "textures", "label": "纹理", "color": "#b77a12" },
+    { "id": "materials", "label": "材质", "color": "#7b529e" },
+    { "id": "batching", "label": "批处理", "color": "#d85747" },
+    { "id": "lighting", "label": "光照", "color": "#8a7016" },
+    { "id": "post-processing", "label": "后处理", "color": "#a84b73" },
+    { "id": "performance", "label": "性能分析", "color": "#367b51" }
+  ],
+  "reports": [
+    {
+      "date": "2026-07-31",
+      "file": "2026-07-31.json",
+      "tags": ["render-pipeline"],
+      "title": "从场景到屏幕：Cocos 怎样把节点变成画面",
+      "summary": "先建立一张最重要的地图：场景里的节点并不会直接出现在屏幕上。"
+    }
+  ]
+}
