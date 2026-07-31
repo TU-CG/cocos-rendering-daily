@@ -1,0 +1,17 @@
+{
+  "date": "2026-07-31",
+  "tags": ["render-pipeline"],
+  "title": "从场景到屏幕：Cocos 怎样把节点变成画面",
+  "summary": "理解渲染的第一步，是分清场景中的物体、负责观察的相机，以及最后出现的屏幕画面之间的关系。",
+  "intuition": "把场景想成一间布置好的房间：节点是房间里的物品，但它们不会自己跳到照片上。相机决定从哪里拍、拍进哪些物品；渲染系统再把这张照片交给屏幕。没有相机，即使场景里有节点，也可能什么都看不见。",
+  "cocos": "在 Cocos Creator 3.x 中，Node 用来组织场景物体；Sprite、Label、MeshRenderer 等组件提供可被绘制的内容；Camera 组件决定观察范围和渲染目标。每一帧，Cocos 会根据相机可见范围收集可绘制对象，按照材质和渲染状态提交给图形设备，最终得到屏幕上的像素。",
+  "exercise": "新建一个 3D 空项目，在场景中保留默认 Camera，再创建一个 Cube。运行预览后移动 Cube 的位置，观察它何时进入或离开画面。接着暂时禁用 Camera 组件并再次预览，体会“有物体”与“能被相机看到”是两件事。",
+  "misconceptions": [
+    "节点出现在层级管理器中，不等于它一定会显示在屏幕上；它还需要可绘制组件，并且要被相机纳入视野。",
+    "相机不是游戏画面的容器，而是决定从哪个角度和范围收集画面的观察者。"
+  ],
+  "sources": [
+    { "title": "Cocos Creator 官方文档：相机组件", "url": "https://docs.cocos.com/creator/3.8/manual/zh/concepts/scene/camera.html" },
+    { "title": "Cocos Creator 官方文档：场景", "url": "https://docs.cocos.com/creator/3.8/manual/zh/concepts/scene/index.html" }
+  ]
+}
