@@ -1,0 +1,25 @@
+{
+    "date":  "2026-08-03",
+    "tags":  [
+                 "camera-ui"
+             ],
+    "title":  "相机决定你看见什么：让 3D 物体与 UI 同时出现在屏幕上",
+    "summary":  "理解相机、节点图层与 Canvas 的分工，排查“节点存在却看不见”的第一类问题。",
+    "intuition":  "把场景想成摄影棚。节点是摆在棚里的物体；相机决定从哪里拍、朝哪里拍，以及哪些物体会进入最终照片。物体确实存在于摄影棚，不代表它必然出现在照片中。Cocos 的每一帧也是这样：先由相机挑选可见内容，再把这些内容画成屏幕像素。\n\n“相机”不是手机摄像头，也不等于录制视频。它是一组观察规则：位置、朝向、投影方式和可见对象的类别。相机前方有一个可以被看见的三维范围，初学时可以把它想成手电筒照出的空间；准确地说，它是相机投影后可能进入画面的区域。节点位于这个区域外、位于相机背后，或没有被相机允许绘制，都会看不见。\n\nUI 则像贴在镜头前的信息板。血条、按钮和分数通常不应该随 3D 地面透视缩小，也不应被场景墙体挡住。Canvas 负责把这些界面节点组织为适合屏幕显示的 UI。于是同一个画面可以同时有远处会变小的立方体，和始终易读的左上角文字：前者属于 3D 世界观察，后者属于 UI 渲染组织。",
+    "cocos":  "本篇适用于 Cocos Creator 3.8；3.x 的基本分工一致。3D 场景中，带 Camera 组件的节点负责观察场景。透视投影（Perspective）接近真实相机，远处物体看起来更小；正交投影（Orthographic）不会因远近改变视觉大小，常用于地图或稳定尺寸的 2D/2.5D 画面。刚开始不必急着调投影参数，先确认相机是否真的能看见节点。\n\nCocos 用 Layer 和 Visibility 做筛选。Layer 是节点的分类标签，不是美术软件中从上到下叠放的图层；Visibility 是相机允许绘制哪些分类的名单。选中 3D 物体可在属性检查器查看 Layer，选中相机节点可在 Camera 组件查看 Visibility。只有节点的 Layer 被这台相机的 Visibility 包含，它才会被这台相机绘制。比如 Cube 使用 DEFAULT 图层，而主相机不包含 DEFAULT，Cube 即使在相机正前方也不会显示。\n\nCanvas 是 UI 系统的入口组件。Label、Button、Sprite 等普通屏幕界面应放在 Canvas 节点下。Canvas 不只是把内容放到“最前面”，它还建立 UI 坐标与屏幕适配关系，并组织 UI 的渲染。3D 节点的位置按世界三维坐标理解，远离透视相机会显得更小；Canvas 下的普通 UI 位置按界面坐标理解，放在左上角的目的是固定在屏幕左上区域。移动主 3D 相机时，HUD 不出现透视变化通常是正确结果。\n\n如果需要一个贴在角色头顶、会随距离缩小且可能被墙遮挡的姓名牌，它更接近 3D 世界对象，而不是普通 Canvas HUD。先区分“希望固定在屏幕上”还是“希望存在于游戏世界中”，再决定使用 UI 还是 3D 内容，是减少渲染困惑的有效方法。",
+    "exercise":  "在空的 3D 场景中保留带 Camera 组件的相机节点；若模板提供 Directional Light，也保留它。创建一个 Cube，确认它的 Layer 是 DEFAULT，并将其放在主相机前方。运行预览后应能看到 Cube。若没有看到，依次检查相机朝向、Cube 与相机的相对位置，以及 Camera 组件的 Visibility 是否包含 DEFAULT，不要先从材质问题开始排查。\n\n接着创建 Canvas；如果模板已有 Canvas，直接使用它。在 Canvas 下创建 Label，将文字改为“这是 UI，不会随立方体远近缩小”，并移动到屏幕左上区域。再次预览：Cube 应作为 3D 世界显示，文字应作为 UI 叠在画面上。调整主相机位置或把 Cube 移远时，Cube 会按透视关系改变视觉大小，文字仍应保持界面式的易读显示。\n\n最后做一个可控实验：选中主相机，在 Camera 的 Visibility 中临时取消 DEFAULT 对应的可见性并预览。Cube 应消失，而 Canvas 下的文字仍可显示；恢复设置后 Cube 会重新出现。这个实验说明层级管理器里有节点，只代表数据存在，最终是否出现在屏幕上还由相机范围和相机筛选决定。",
+    "misconceptions":  [
+                           "节点出现在层级管理器中，不等于它一定会显示在屏幕上；它可能在相机范围外、相机背后，或处于相机不可见的 Layer。",
+                           "Canvas 不只是把 UI 放到最前面。它还管理 UI 坐标、屏幕适配和界面渲染组织；普通屏幕 UI 与 3D 世界物体的职责不同。"
+                       ],
+    "sources":  [
+                    {
+                        "title":  "Cocos Creator 3.8 官方文档：Camera",
+                        "url":  "https://docs.cocos.com/creator/3.8/manual/en/editor/components/camera-component.html"
+                    },
+                    {
+                        "title":  "Cocos Creator 3.8 官方文档：Canvas Component Reference",
+                        "url":  "https://docs.cocos.com/creator/3.8/manual/en/ui-system/components/editor/canvas.html"
+                    }
+                ]
+}
