@@ -43,6 +43,15 @@
              ],
     "reports":  [
                     {
+                        "date":  "2026-08-04",
+                        "file":  "2026-08-04.json",
+                        "tags":  [
+                                     "textures"
+                                 ],
+                        "title":  "一张图片为何能显示：认识 Texture 与 SpriteFrame",
+                        "summary":  "从导入图片到 Sprite 显示，建立纹理资源、裁剪范围和 UI 图像组件的基本分工。"
+                    },
+                    {
                         "date":  "2026-08-03",
                         "file":  "2026-08-03.json",
                         "tags":  [
