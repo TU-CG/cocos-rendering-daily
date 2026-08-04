@@ -1,0 +1,25 @@
+{
+    "date":  "2026-08-04",
+    "tags":  [
+                 "textures"
+             ],
+    "title":  "一张图片为何能显示：认识 Texture 与 SpriteFrame",
+    "summary":  "从导入图片到 Sprite 显示，建立纹理资源、裁剪范围和 UI 图像组件的基本分工。",
+    "intuition":  "想让屏幕出现一张图，最直接的想法是“把 PNG 放到节点上”。这个说法方向没错，却少了一个关键中间步骤。图片文件只是装在硬盘里的像素数据；游戏运行时，Cocos 需要知道应从哪张图片取颜色、取其中的哪一块，以及把这块颜色铺到节点的什么形状上。今天只建立这条最基础的链路：图片文件 -\u003e Texture（纹理）-\u003e SpriteFrame（精灵帧）-\u003e Sprite（显示组件）。\n\n可以把 Texture 想成一张放在调色盘上的大图纸。图纸上密密麻麻的彩色小格，就是像素；准确地说，纹理是供 GPU 采样使用的图像数据资源。屏幕上的每一个像素在绘制 Sprite 时都会去纹理中查询一个颜色。“采样”听起来很技术化，直觉上就是拿着坐标到图纸的某个位置取色。\n\nSpriteFrame 则像在这张图纸上框出的取图窗口。若整张图只有一个按钮图标，窗口可以覆盖全图；若同一张图里排着多个图标，窗口只框其中一个。这样同一份 Texture 可以被多个 SpriteFrame 重复利用，每个 SpriteFrame 指向不同区域。准确地说，SpriteFrame 保存了 Texture 的引用以及用于显示的矩形区域、原始尺寸等信息。\n\n最后，Sprite 是真正负责把内容画到屏幕上的组件。它挂在节点上，读取自己设置的 SpriteFrame，按节点的变换、尺寸和颜色把那一小块纹理绘制出来。没有 SpriteFrame 时，Sprite 不知道该用哪张图片；只有 Texture 而没有任何 Sprite 使用它，图片也不会自动出现。先分清“图片资源”和“显示图片的组件”，以后排查空白图会快很多。",
+    "cocos":  "本篇适用于 Cocos Creator 3.8，核心资源关系也适用于 Cocos Creator 3.x。把 PNG、JPG 等图片拖入项目的 assets 目录后，编辑器会把它作为纹理资源导入。选中该资源时，属性检查器会显示它的导入信息；图片不会因为出现在 assets 面板里就自动进入场景，必须再被场景中的组件引用。\n\n对于普通 2D 图像，最常见的使用者是带 Sprite 组件的节点。Sprite 组件的 SpriteFrame 属性要求的是 SpriteFrame，而不是随便一个节点名称或文件路径。编辑器通常会为可用的图片资源提供对应的 SpriteFrame 子资源，或让你通过资源选择器挑选它。把资源拖到 SpriteFrame 属性，是让“显示组件”获得“取图说明”的直观操作。\n\n不要把 SpriteFrame 理解成动画的专属概念。它确实可以作为逐帧动画的一帧，但单张静态背景、小图标和头像同样常用 SpriteFrame。它的重点不是“会动”，而是“规定这一次从哪张纹理的哪块区域取图”。这也是图集能工作的重要原因：一张大纹理中有许多小图，多个 SpriteFrame 可以各自引用不同区域。\n\n导入设置也会影响最终观感，但初学时只需知道两件事。第一，纹理有固定的像素尺寸，例如 256 x 256；它被放大到更大的屏幕区域时，GPU 必须根据纹理样本推断颜色，边缘可能变软或出现像素感。第二，图像透明区域通常来自 PNG 的 alpha（透明度）通道，Sprite 的透明部分不会像不透明像素那样遮住后面的内容。JPG 不支持 alpha，所以它更适合不需要透明边缘的照片背景。\n\n这条链路也解释了一个常见现象：同一个 Texture 可以给许多 Sprite 使用，却不等于会复制多张相同图片到内存。引用同一资源与创建多份资源是不同的事。后续学习图集和批处理时，会进一步利用这种共享关系；现在先确保自己能在属性检查器里辨认出 Texture、SpriteFrame 和 Sprite 分别扮演什么角色。",
+    "exercise":  "准备一张带明显透明边缘的小 PNG，例如一个彩色圆形图标，并把它拖入空项目的 assets 目录。为便于观察，图片建议不小于 64 x 64 像素。等待资源导入完成后，选中图片资源，确认它已正常显示预览；这一步只说明纹理资源存在，尚未说明场景能显示它。\n\n在层级管理器中新建一个 UI 节点，并为它添加 Sprite 组件；如果空项目已有 Canvas，就把该节点放在 Canvas 下。选中这个节点，在属性检查器的 Sprite 组件中找到 SpriteFrame 属性，把刚导入图片对应的资源拖到该属性上。将节点放在 Canvas 中央，再运行预览。预期结果是：画面中央显示该图片，PNG 的透明区域能露出 Canvas 后面的背景。\n\n做两个小对照。先把 SpriteFrame 清空：节点仍在层级管理器中，但图片应不再显示，说明节点本身不是图片。再把 SpriteFrame 恢复，并调大节点的 UITransform 宽高或在场景中拉伸它：图片会变大，细节可能显得更模糊或更有像素感。它没有重新导入一张更大的图片，只是在用同一份纹理数据绘制更大的区域。\n\n最后可选地再导入一张没有透明通道的 JPG，按同样方法赋给 SpriteFrame。比较两者边缘：PNG 中原本透明的部分能透出背景，而普通 JPG 会以它自己的像素颜色填满矩形区域。这个对照能帮助你把“图像文件格式”与“Sprite 如何显示”联系起来。",
+    "misconceptions":  [
+                           "把图片放进 assets 面板不等于把它画到屏幕上。还需要场景节点上的 Sprite 组件引用一个 SpriteFrame。",
+                           "SpriteFrame 不只用于帧动画。静态图标也可通过它指定从哪张 Texture 的哪块区域取图。"
+                       ],
+    "sources":  [
+                    {
+                        "title":  "Cocos Creator 3.8 官方文档：Texture",
+                        "url":  "https://docs.cocos.com/creator/3.8/manual/en/asset/texture.html"
+                    },
+                    {
+                        "title":  "Cocos Creator 3.8 官方文档：Sprite Component Reference",
+                        "url":  "https://docs.cocos.com/creator/3.8/manual/en/ui-system/components/editor/sprite.html"
+                    }
+                ]
+}
