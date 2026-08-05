@@ -44,7 +44,7 @@
     "reports":  [
                     {
                         "date":  "2026-08-05",
-                        "file":  "data/2026-08-05.json",
+                        "file":  "2026-08-05.json",
                         "tags":  [
                                      "materials"
                                  ],
