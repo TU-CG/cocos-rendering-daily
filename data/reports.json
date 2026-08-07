@@ -43,6 +43,16 @@
              ],
     "reports":  [
                     {
+                        "date":  "2026-08-07",
+                        "file":  "2026-08-07.json",
+                        "tags":  [
+                                     "batching",
+                                     "performance"
+                                 ],
+                        "title":  "为什么一排相同图标更省力：认识 2D 批处理",
+                        "summary":  "理解 Cocos 如何把条件相同的连续 UI 绘制合并，减少 CPU 向 GPU 发出的工作指令。"
+                    },
+                    {
                         "date":  "2026-08-06",
                         "file":  "2026-08-06.json",
                         "tags":  [
