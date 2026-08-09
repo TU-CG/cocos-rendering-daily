@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-09",
+  "tags": ["lighting"],
+  "title": "阴影为什么不出现：看懂动态阴影的三道开关",
+  "summary": "用场景、光源和物体的三处设置，建立动态阴影从产生到落地的排错顺序。",
+  "intuition": "把手电筒照向桌上的积木，墙面或桌面上才会出现影子。这个看似简单的结果，至少需要三件事同时成立：有一盏能照亮的灯，有一个挡住光线的积木，还要有一块可以接住影子的表面。少了其中任何一个，你都不会看到完整的影子。\n\nCocos 中的动态阴影也是同样的协作。它不是给模型贴上一块灰色贴纸，而是渲染器根据光线方向、模型形状和接收表面的位置，在每一帧计算出来的暗部。可以把它理解成舞台灯光师的三步工作：先允许整座舞台使用影子，再让灯具参与投影，最后指定哪些道具负责遮光、哪些地面负责接影。\n\n因此，看到 Cube 明暗变化却没有地面阴影，并不表示光源失效。明暗说明光照正在参与物体表面颜色的计算；阴影还需要额外的开关和接收者。按固定顺序检查，比在 Inspector 里随机勾选选项可靠得多。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS 的 3D 场景。官方文档把阴影类型放在场景节点的 Shadows 组件中；先在 Hierarchy 选中 Scene，再在 Inspector 的 Shadows 组件勾选 Enabled。这是总开关，表示当前场景允许渲染阴影。\n\n第二道开关在光源上。选中 Main Light（或你自己添加的 Directional Light），在 Inspector 的 Dynamic Shadow Settings 中勾选 Shadow Enabled。昨天学习过方向光：它的 Rotation 决定光线从哪个方向照来。这里的 Shadow Enabled 则是在说，这盏光除了让模型变亮或变暗，还要参与计算投影。若阴影方向看起来不合理，官方建议检查方向光的方向；移动方向光节点的位置通常不能像移动手电筒那样改变投影方向。\n\n第三道开关在模型的 MeshRenderer 组件。作为遮光物的 Cube 要将 Cast Shadows 设为 ON，告诉渲染器“请用我的形状挡光”。这一步只决定谁投出影子，并不自动决定影子落在哪里。选择 ShadowMap 类型时，作为地面的 Plane 还要在自己的 MeshRenderer 中将 Receive Shadows 设为 ON，才会接收阴影。可以把 Cast 想成“投出”，把 Receive 想成“接住”：一个物体可只投不接，也可只接不投。\n\nShadows 组件的 Type 用来选择阴影方案。Planar Shadow 是较简单场景常用的平面阴影，适合先建立“影子落在地面上”的直觉；ShadowMap 会从光源视角记录深度信息，再判断哪些像素被遮挡，效果空间感更强，但需要正确的接收设置，也会增加渲染工作。第一次练习不必比较画质，只要选定一种方案并按顺序完成开关即可。\n\n还有一个容易混淆的边界：阴影不是所有材质都会以相同方式显示。先使用默认材质的 Cube 和 Plane 验证设置，再换自己的模型和材质。这样若失败，就能分辨问题在阴影链路，还是在模型、材质或相机位置，而不是一次面对所有可能性。",
+  "exercise": "在 Cocos Creator 3.8 新建一个 3D 场景，完成下面约十五分钟的观察。不需要写脚本。\n\n1. 在 Hierarchy 确认有 Scene、Main Light 和 Camera。创建一个 Cube；再创建一个 Plane，放在 Cube 下方。调整 Cube 的 Y 位置，让它明显悬在 Plane 上方，并确认 Camera 能看到两者。先运行或预览一次，记住此时 Cube 的明暗。\n\n2. 选中 Scene，在 Inspector 找到 Shadows 组件，勾选 Enabled。把 Type 设为你准备观察的一种阴影类型。若选 ShadowMap，先记住 Plane 稍后需要 Receive Shadows；不要因为还没有影子就立刻同时修改很多参数。\n\n3. 选中 Main Light，在 Dynamic Shadow Settings 中勾选 Shadow Enabled。再选中 Cube，在 MeshRenderer 中把 Cast Shadows 设为 ON。运行后观察 Plane：若光源方向和相机位置合适，Cube 下方应出现随 Cube 位置和 Main Light Rotation 改变的暗影。\n\n4. 若你使用 ShadowMap，选中 Plane，在 MeshRenderer 中将 Receive Shadows 设为 ON。此时 Plane 才是“接影者”。尝试只关闭 Cast Shadows：暗影应消失；再重新开启 Cast Shadows、只关闭 Receive Shadows：Plane 上的阴影也应消失。一次只改一个选项，亲眼确认它负责的是“投出”还是“接住”。\n\n5. 最后只旋转 Main Light 的 Transform Rotation，例如逐步调整 Y 轴。你应看到 Plane 上阴影的朝向随之改变。若影子看不清，先让 Cube 和 Plane 使用默认材质、提高两者之间的距离，并检查阴影是否落在当前 Camera 能看到的范围内。练习成功的标准不是做出漂亮画面，而是你能说清楚：场景总开关、光源投影开关、Cube 的 Cast Shadows，以及 ShadowMap 下 Plane 的 Receive Shadows，各自少了会发生什么。",
+  "misconceptions": [
+    "“只要有 Main Light，物体就一定有地面阴影。”不对。光照产生的表面明暗和动态阴影是两条相关但不同的渲染工作；场景 Shadows、光源 Shadow Enabled、投射物 Cast Shadows 都需要检查。",
+    "“Cast Shadows 打开后，任何物体都会自动接住影子。”不对。Cast Shadows 只指定遮光物。使用 ShadowMap 时，接收者还要在自己的 MeshRenderer 中开启 Receive Shadows。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS: Shadows",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/concepts/scene/light/shadow.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS: Directional Lights",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/concepts/scene/light/lightType/dir-light.html"
+    }
+  ]
+}
