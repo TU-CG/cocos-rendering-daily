@@ -1,0 +1,23 @@
+﻿{
+  "date": "2026-08-11",
+  "tags": ["render-pipeline", "camera-ui"],
+  "title": "不直接上屏的相机画面：认识 RenderTexture",
+  "summary": "让相机先把画面写进一张纹理，再显示到 UI，建立离屏渲染的第一层直觉。",
+  "intuition": "平时相机像一台现场直播的摄像机：它看见场景，画面立刻送到屏幕。RenderTexture（渲染纹理）则像给摄像机接上一台小显示器和录像机。相机仍然拍摄场景，但不急着把结果交给屏幕；它先把每一帧画进一张由显卡保存的特殊图片。之后，这张图片既可以被 UI 中的 Sprite 显示，也可以交给材质当作贴图使用。\n\n这个名字里有两个部分。Texture（纹理）可以先理解为一张供 GPU 读取的图片；Render（渲染）表示这张图片不是从磁盘导入，而是由相机刚刚画出来。它不是截图文件，不会自动保存成 PNG，也不是另一个摄像机节点。准确地说，RenderTexture 是 GPU 上的纹理资源，可作为相机的渲染目标，承接相机在屏幕之外完成的颜色结果。\n\n把它想成监控画面很合适。房间里有一个 3D Cube，监控相机拍 Cube；监控画面先写到 RenderTexture；大厅墙上的 UI 面板再把这张 RenderTexture 显示出来。屏幕上的小画面并没有重新复制 Cube，也没有让 UI 变成 3D 相机，它只是展示了另一台相机已经画好的结果。这个关系是今天唯一要掌握的核心：相机负责生产画面，RenderTexture 负责暂存画面，Sprite 或材质负责消费画面。\n\n为什么不直接让相机上屏？当你需要后视镜、监控窗口、小地图、角色头像预览，或把一台相机的结果交给后续效果时，先得到可复用的画面就很有用。代价也很直观：每启用一台真正渲染场景的相机，GPU 可能要多画一次物体。RenderTexture 不是免费的“复制屏幕”，而是一份需要预算的额外画面。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。官方手册将 RenderTexture 定义为 GPU 上的纹理；常见用法是把它设为 Camera 组件的 TargetTexture，使该相机照到的内容通过离屏 framebuffer 画入纹理。这里的“离屏”只是在说结果暂时不直接显示到设备屏幕，并不表示相机失效或场景暂停。\n\n在编辑器中，可以在 Assets 面板左上角的 + 菜单创建 RenderTexture 资源。选中资源后，Inspector 中可设置宽和高。它们决定这张画面有多少像素，例如 256 x 256。分辨率越高，细节通常越清楚，同时占用的显存和渲染工作也越多；第一次练习用 256 x 256 就够了。不要把它与普通 PNG 混为一谈：PNG 的内容在导入时已经固定，RenderTexture 的内容会随相机每帧重新绘制。\n\n要让相机写入这张纹理，选中相机节点，在 Camera 组件的 TargetTexture 属性中指定该 RenderTexture。设置完成后，这台相机的结果不再直接作为默认屏幕输出，而是成为纹理内容。目标相机仍然有自己的位置、旋转、FOV、Culling Mask 等设置，因此它看到什么，仍由 Camera 决定；RenderTexture 只改变“画到哪里”。如果它的 Culling Mask 排除了 Cube，纹理里也不会有 Cube。\n\n官方手册还说明，RenderTexture 可以像普通纹理一样用于 2D/UI。最容易验证的路径是给 Canvas 下的节点添加 Sprite 组件，然后把 RenderTexture 从 Assets 面板拖到 Sprite 的 SpriteFrame 属性。这里初学者容易困惑：SpriteFrame 原本常常来自 PNG 图集，但它同样可以引用 RenderTexture。因此 Sprite 不是去操作相机，也不是每帧把画面读回 CPU；它只是让 GPU 在绘制 UI 时采样那张相机已经写好的纹理。\n\n用代码动态创建时，Cocos 3.8 官方示例使用 RenderTexture.reset({ width, height }) 初始化尺寸，再将它赋给 camera.targetTexture；随后新建 SpriteFrame 并将其 texture 设为该 RenderTexture。这个流程比“把相机画面转成图片文件”短得多，因为画面一直留在 GPU 的渲染链路里。今天不要调用 readPixels：那是把像素读进 CPU 的另一类需求，通常更慢，也不需要用于制作监控小窗。\n\n一个更精确的边界也很重要：RenderTexture 不是后处理本身。后处理是在相机已经得到的结果上做全屏算法；RenderTexture 是一个可被相机写入、再被其他渲染步骤读取的目标。它们都涉及“先画到屏幕之外”，但解决的问题不同。后处理强调改变画面；RenderTexture 强调保存并转交画面。",
+  "exercise": "在 Cocos Creator 3.8 的 3D 空项目中做一个约十五分钟的练习。目标是让一台 3D Camera 拍摄 Cube，并把画面显示在 Canvas 的 Sprite 上。\n\n1. 保留场景中的 Camera 和 Main Light，创建一个 Cube，调整 Cube 和 Camera，使运行时能稳定看见 Cube。再创建 Canvas；在 Canvas 下创建一个空节点，例如命名为 Preview，给它添加 Sprite 组件。先运行一次，Preview 没有 SpriteFrame 时应当不显示画面。\n\n2. 在 Assets 面板左上角点击 +，创建 RenderTexture，命名为 CameraPreview，并在 Inspector 将宽和高设为 256。选中场景里的 Camera，在 Camera 组件的 TargetTexture 属性中把 CameraPreview 拖进去。此时不要期待它自动出现在 UI；你只是完成了“相机写入纹理”。\n\n3. 选中 Preview 的 Sprite 组件，把 Assets 中的 CameraPreview 拖到 SpriteFrame 属性。调整 Preview 的 UITransform 宽高，例如 256 x 256，并放在 Canvas 中容易看到的位置。运行场景后，你应在 UI 中看到 Camera 视角里的 Cube。旋转 Cube 或移动相机，Preview 中的画面也会跟着更新；这说明它不是一次性截图。\n\n4. 做一个开关实验：把 Camera 的 TargetTexture 清空后运行，Preview 不再获得持续更新的相机画面；再重新指定 CameraPreview，画面恢复。然后保持 TargetTexture 不变，只把 Preview 的 SpriteFrame 清空：相机仍会写入纹理，但 UI 没有消费者，所以你在屏幕上看不到这个预览。这两次实验分别验证了“生产画面”和“显示画面”是两件独立的事。\n\n5. 可选代码版：将下面脚本保存为 CaptureToUI.ts，挂到一个空节点；在 Inspector 将 Canvas 下带 Sprite 的 Preview 节点拖到 sprite，将 3D Camera 节点拖到 camera。它使用官方 3.8 文档的最小 API 组合，不要求你预先创建 RenderTexture 资源。运行后，Preview 应显示 256 x 256 的相机画面。\n\nimport { _decorator, Camera, Component, RenderTexture, Sprite, SpriteFrame } from 'cc';\nconst { ccclass, property } = _decorator;\n\n@ccclass('CaptureToUI')\nexport class CaptureToUI extends Component {\n  @property(Sprite)\n  sprite: Sprite | null = null;\n\n  @property(Camera)\n  camera: Camera | null = null;\n\n  start() {\n    if (!this.sprite || !this.camera) return;\n\n    const renderTexture = new RenderTexture();\n    renderTexture.reset({ width: 256, height: 256 });\n    this.camera.targetTexture = renderTexture;\n\n    const spriteFrame = new SpriteFrame();\n    spriteFrame.texture = renderTexture;\n    this.sprite.spriteFrame = spriteFrame;\n  }\n}\n\n练习成功的标准是：你能说出 Preview 显示的不是 Canvas 自己拍到的内容，而是 Camera 先写入 RenderTexture、Sprite 再读取的画面。",
+  "misconceptions": [
+    "“给 Camera 设置 TargetTexture 后，画面会同时自动显示在主屏幕和 UI 上。”不对。TargetTexture 指定了这台相机的输出目标；若要在 UI 中看见它，还要用 SpriteFrame、材质等对象读取这张 RenderTexture。",
+    "“RenderTexture 就是保存到磁盘的截图。”不对。它是 GPU 上可持续更新的纹理。截图或调用 readPixels 会涉及把数据读到 CPU、再自行编码保存，这是不同的工作。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS: RenderTexture",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/asset/render-texture.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS: Camera Component",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/editor/components/camera-component.html"
+    }
+  ]
+}
