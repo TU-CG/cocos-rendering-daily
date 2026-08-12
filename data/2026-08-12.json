@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-12",
+  "tags": ["performance"],
+  "title": "别只看 FPS：用一帧时间读懂卡顿",
+  "summary": "把帧率换算成每帧耗时，先学会用可观察的数据判断卡顿是否真的改善。",
+  "intuition": "当你觉得游戏“有点卡”，最容易盯着 FPS（每秒帧数）看：60 FPS 听起来不错，30 FPS 听起来较低。但 FPS 像汽车仪表上的平均速度，只告诉你一秒完成了多少次画面更新，不能直接说明是哪一次慢了，也不能告诉你慢在脚本、提交绘制工作还是显卡真正出图。更适合排查的第一把尺子是“每帧用了多少毫秒”。\n\n把屏幕想成一本不断翻页的动画书。60 FPS 的意思是一秒翻 60 页，因此一页只有约 16.7 毫秒的时间；30 FPS 则是一页约 33.3 毫秒。它们不是两套不同的指标，而是同一件事的两种读法：每帧耗时（毫秒）约等于 1000 除以 FPS。只要某一帧超过你的时间预算，画面就可能错过下一次刷新机会，玩家看到的便是顿挫。显示器的刷新率、系统调度和垂直同步也会影响最终观感，所以不要把某一次读数当成绝对判决；连续观察才有意义。\n\n例如，目标是 60 FPS 时，16.7 毫秒是一个实用预算。脚本更新花 6 毫秒、渲染准备花 7 毫秒、其他工作花 5 毫秒，总计 18 毫秒，就已经无法稳定落在 60 FPS。这里重要的不是背下每个数字，而是建立顺序：先确认慢帧是否存在，再看它持续多久，最后才用更细的统计判断最可能的来源。先量再改，能避免“删了几个节点但卡顿没变”的盲目优化。\n\n还要区分平均值和最慢值。连续 60 帧都在 16 毫秒附近，体验通常平稳；59 帧是 10 毫秒、1 帧突然是 80 毫秒，平均 FPS 仍可能看起来不差，但那一帧会非常明显地跳一下。初学阶段请把性能数字当作体温计：它告诉你哪里值得继续检查，而不是单凭一个数就宣布某段代码有罪。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。官方 Profiler 文档说明，性能统计可以给出 CoreStats、ObjectStats、MemoryStats 和 PerformanceStats。对刚起步的渲染学习者，先认识三类最有用的线索即可：每帧渲染时间、render calls（绘制调用次数）与 2D rendering batches（2D 批次数）。它们描述的不是同一件事。\n\n每帧渲染时间描述渲染相关工作在一帧中花了多久。它能帮助你把“运行时不顺”转换为可比较的毫秒数，但它不是整台设备的所有耗时，也不能单独证明是某一个节点造成问题。render calls 可以先理解为 CPU 向图形系统提交的绘制命令数量；批次则是 Cocos 在条件允许时，把连续且状态兼容的 2D 绘制合成较少提交的结果。它们在界面复杂时很有参考价值，不过“批次更少”也不自动保证帧更快，因为脚本、粒子、像素填充、纹理尺寸、阴影和设备能力都可能成为主要限制。\n\n所以正确的问题不是“现在有几个批次，算不算好”，而是“改动前后，同一场景、同一设备、同一操作下，慢帧和相关统计是否一起改变”。例如，你把十张独立大图换成图集后，如果 2D 批次数下降、帧时间也稳定缩短，这是一条有价值的证据；若批次数下降而慢帧未变，就应停止猜测，继续检查其他工作。不要跨设备直接比较绝对数：电脑编辑器预览、手机浏览器和原生包的 CPU、GPU、分辨率和后台负载都不同。\n\nCocos 的 Component 生命周期提供了另一个非常小的观察窗口：挂在激活节点上的组件会持续收到 update(deltaTime)。其中 deltaTime 是这次更新距离上次更新的时间，单位是秒。把它乘以 1000，就能得到应用更新间隔的近似毫秒数。它不是 GPU 专用计时器，也不能替代正式 Profiler；它的价值是让你在空项目中亲眼看见“平均帧时间”和“偶发慢帧”是两个不同概念。真正做性能归因时，再结合 3.8 的 Profiler 统计和目标设备测试。\n\n还有一个容易误读的边界：FPS 并非永远越高越好。若项目启用了帧率限制或垂直同步，读数可能稳定在一个上限；此时把 60 推到 120 可能没有用户可见收益。今天的目标是稳定地满足项目的帧时间预算，而不是把任何计数器追到最大。渲染优化也应从可重复的场景开始，例如固定数量的 Sprite、固定相机位置和固定操作路径，避免把资源加载、网络波动或编辑器热更新混进对比结果。",
+  "exercise": "在 Cocos Creator 3.8 的 2D 空项目中做一个约十五分钟的练习。先在 Canvas 下创建一个空节点，命名为 FrameMeter；新建以下 TypeScript 脚本 FrameTimeSampler.ts 并挂到 FrameMeter。无需额外组件或资源。\n\nimport { _decorator, Component } from 'cc';\nconst { ccclass } = _decorator;\n\n@ccclass('FrameTimeSampler')\nexport class FrameTimeSampler extends Component {\n  private frames = 0;\n  private totalMs = 0;\n  private worstMs = 0;\n\n  update(deltaTime: number) {\n    const frameMs = deltaTime * 1000;\n    this.frames += 1;\n    this.totalMs += frameMs;\n    this.worstMs = Math.max(this.worstMs, frameMs);\n\n    if (this.frames === 60) {\n      const averageMs = this.totalMs / this.frames;\n      console.log(\n        `60-frame sample: avg ${averageMs.toFixed(2)} ms, ` +\n        `worst ${this.worstMs.toFixed(2)} ms`\n      );\n      this.frames = 0;\n      this.totalMs = 0;\n      this.worstMs = 0;\n    }\n  }\n}\n\n运行预览并打开预览环境的控制台。每约 60 帧会输出一组平均毫秒和最慢毫秒。先什么都不改，记下两三组结果。接着在 Canvas 下复制多个 Sprite，给它们指定同一张图片，并让它们分布在屏幕中；再次记录。你不必期待某个固定数字，因为设备不同，但应观察两件事：平均值和最慢值是否不同，以及增加可见内容后它们是否更容易变大。\n\n再做一个“错误读数”实验：切换到别的窗口几秒再回来。你可能会得到很大的 worst 值。它不等于 Cocos 的渲染突然变差，而是应用在后台没有按正常节奏更新。因此记录有效样本时，要保持窗口前台、场景和操作一致。最后删除新增 Sprite，确认数据回到接近基线。这个往返动作比只看一次 FPS 更能说明：优化需要可比较的前后样本。\n\n练习成功的标准不是达到某个 FPS，而是能准确说出：这段脚本报告的是 update 间隔的近似值；若要判断渲染提交或批处理是否是原因，还要看 Cocos Profiler 中对应的渲染统计，不能凭一个平均值下结论。",
+  "misconceptions": [
+    "“60 FPS 就表示每一帧都用了 16.7 毫秒。”不对。它通常是一个采样或平均结果；少数特别慢的帧可能被平均值掩盖，所以还要关注最慢值和是否持续发生。",
+    "“绘制调用或批次数一降，性能一定提升。”不对。它们只是渲染提交侧的线索。若瓶颈在脚本、纹理显存、阴影或像素填充，计数下降也可能没有可感知改善。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS: Profiler",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/advanced-topics/profiler.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS: Lifecycle Callbacks",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/scripting/life-cycle-callbacks.html"
+    }
+  ]
+}
