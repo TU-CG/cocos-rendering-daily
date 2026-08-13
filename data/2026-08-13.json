@@ -1,65 +1,23 @@
 {
   "date": "2026-08-13",
-  "title": "每日 AI 游戏综合日报",
-  "summary": "过去一日，AI 在游戏行业的进展集中体现为发行商把资源转向生成式内容平台、创作者工具进入公开活动，以及大型平台继续扩大 AI 基础设施投入；与此同时，开发者调查显示团队对岗位和生产率变化仍持分化态度。",
-  "items": [
-    {
-      "title": "Gamehaus 将战略重心转向 AI 生成内容与创作者生态",
-      "paragraphs": [
-        "Gamehaus Holdings 宣布逐步优化第三方休闲游戏发行，现有作品按现金流和盈利能力管理，并把资源投入 AI 生成内容工具及其分发。公司计划向包括游戏开发者在内的第三方创作者提供 AI 内容生成工具，同时保留小规模内部开发和测试团队，用于验证和改进工具。",
-        "公司称，初期重点是休闲手游，并已对一家专注 AI 游戏生成的早期工作室进行少数股权投资；该工作室涉及 AI 辅助美术、资产和关卡生成流程。上述战略与业务展望属于公司公告中的自报内容。"
-      ],
-      "url": "https://www.prnewswire.com/news-releases/gamehaus-announces-strategic-shift-toward-ai-generated-content-302849250.html"
-    },
-    {
-      "title": "Epic 将 ArtStation 与 Sketchfab 转让给 KitBash3D",
-      "paragraphs": [
-        "Epic Games 宣布，创作者作品展示平台 ArtStation 和 3D 模型分享平台 Sketchfab 将归入 KitBash3D 所在的 KitBash。Epic 表示，Fab、Fortnite、Unreal Engine 和 Epic Games Store 仍属于其生态；ArtStation 与 Sketchfab 的用户账户、作品集、订阅、价格和内容所有权不会因交易立即改变。",
-        "KitBash 表示将把两个社区与 KitBash3D、Greyscalegorilla 的资源整合。交易涉及游戏资产和创作者分发平台，双方公告未披露交易金额。"
-      ],
-      "url": "https://www.epicgames.com/site/news/kitbash-acquires-artstation-and-sketchfab"
-    },
-    {
-      "title": "腾讯二季度游戏增长并继续扩大 AI 基础设施投入",
-      "paragraphs": [
-        "腾讯公布 2026 年第二季度业绩，国内游戏收入同比增长 17% 至人民币 473 亿元，国际游戏收入为人民币 186 亿元；公司同时披露广告业务增长与 AI 产品推进。腾讯投资者材料列出 Hunyuan 3 已于 7 月提供完整生产版本，WorkBuddy 和 CodeBuddy 用户增长，并开始小规模测试内置于微信的 Xiaowei 智能体原型。",
-        "公司当季经营资本开支同比大幅增加，主要用于 GPU 和计算基础设施扩张；这部分投入及 AI 产品进展均来自腾讯财报和管理层披露。"
-      ],
-      "url": "https://www.tencent.com/investors/"
-    },
-    {
-      "title": "The Sandbox 启动 $7,500 “Overgrown” AI 创作者 Game Jam",
-      "paragraphs": [
-        "The Sandbox 宣布 8 月 12 日启动 Beta Creators Game Jam，主题为“Overgrown”，活动持续至 9 月 11 日，总奖金为 7,500 美元，Larry Hryb 担任首席评委。参赛作品须使用 The Sandbox Studio 编辑器制作，并面向桌面或移动设备优化。",
-        "The Sandbox Studio 页面介绍了从提示生成、迭代、测试到发布的游戏创作流程，并称工具可连接 Claude Code、Cursor、OpenAI Codex 等代理，支持浏览器、移动端和桌面端发布；这些功能描述为 The Sandbox 的产品说明。"
-      ],
-      "url": "https://www.sandbox.game/en/blog/ai-creator-game-jam-overgrown/"
-    },
-    {
-      "title": "Gamescom Dev Speaker 调查显示开发者对生成式 AI 影响分化",
-      "paragraphs": [
-        "GameDeveloper 报道 Gamescom Dev Speaker 调查结果。调查收集 100 名本届会议演讲者的回答，其中 83% 预计 AI 会在某种程度上影响团队结构或生产率；36% 预计岗位会改变而非团队缩减，33% 预计团队规模变小，14% 预计人均产出提高。",
-        "受访者当前最常在代码和制作环节看到 AI 价值，也有 30% 希望在游戏开发中尽量少使用 AI。调查还记录了 AI 在管理、测试、艺术、文本本地化、市场营销和叙事设计等环节的使用比例。"
-      ],
-      "url": "https://www.gamedeveloper.com/business/developers-expect-generative-ai-to-impact-roles-and-team-sizes-in-the-next-three-years"
-    }
+  "tags": ["performance"],
+  "title": "Profiler 里的数字在说什么：用证据定位渲染瓶颈",
+  "summary": "把性能统计当作排查线索，区分帧时间、绘制提交与三角形数量，不再看到一个数字就盲目优化。",
+  "intuition": "把 Cocos 的 Profiler 想成体检报告，而不是自动诊断书。体检报告会告诉你心率、血压、血糖这些数字，但不会只凭一个数字就宣布“病因就是这里”。渲染性能也是一样：一个场景卡顿时，Profiler 里的数字能帮你缩小排查范围，但它们本身不是结论。\n\n今天只抓一个核心概念：性能数字要成组地看，并且要和你的改动前后对比。比如 render calls 变多，说明程序向图形系统提交绘制工作的次数可能变多；2D batches 变多，说明 UI 或 2D 元素没能很好地合并绘制；triangles 变多，说明 GPU 要处理的三角形数量变多。它们都像路标，告诉你往哪个方向查，而不是直接告诉你“删这个节点就好”。\n\n初学者最容易犯的错，是看到一个数字偏高就立刻优化。更稳的做法是先建立基线：同一个场景、同一台设备、同一段操作，记录修改前的数字；只改一个因素，再记录修改后的数字。如果数字变化和卡顿改善一起出现，这才是一条有用证据。如果数字变了但卡顿没变，就说明主要瓶颈可能在别处。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。Cocos 的性能统计会把运行时信息分成几类，例如 CoreStats、ObjectStats、MemoryStats 和 PerformanceStats。零基础阶段不需要一次记住所有项目，先认识和渲染最相关的几类信号即可。\n\n第一类是时间。每帧耗时告诉你一帧大约花了多久。目标 60 FPS 时，一帧预算大约是 16.7 毫秒；目标 30 FPS 时，一帧预算大约是 33.3 毫秒。注意，它不是“渲染一定花了这么多”，而是让你知道画面更新是否超出了预算。\n\n第二类是提交次数。render calls 可以直觉理解为 CPU 对图形系统说“请画这一批东西”的次数。次数越多，CPU 这边组织和提交绘制工作的压力通常越大。2D rendering batches 则更贴近 Cocos UI 和 2D Sprite：当多个 2D 元素连续、材质和纹理等状态兼容时，Cocos 有机会把它们合并成较少批次提交。批次少通常是好信号，但不是绝对结论，因为真正慢的地方也可能是脚本、资源加载、透明像素填充、阴影或设备 GPU 能力。\n\n第三类是几何数量。triangles 表示三角形数量。3D 模型最终会拆成很多三角形交给 GPU 处理。三角形越多，GPU 要处理的几何工作通常越多。但同样不能孤立判断：一个低三角形模型如果用了昂贵材质、实时阴影或很大的屏幕覆盖面积，也可能很重。\n\n所以在 Cocos 中读 Profiler，应按“现象、证据、实验”的顺序来：先确认玩家看到的现象，例如拖动列表掉帧、打开复杂界面变慢；再看相关数字，例如 2D batches、render calls、triangles 或帧时间是否异常；最后做一个小实验，只改一个因素，再比较前后。这样你是在定位问题，而不是追着数字跑。",
+  "exercise": "在 Cocos Creator 3.8 的空项目里做一个不需要写代码的观察练习。\n\n第一步，创建一个 2D 空项目，保留默认 Canvas。运行预览，打开 Cocos 的 Profiler 或性能统计显示，先观察空场景下的帧时间、render calls 和 2D batches。不要急着判断好坏，只把它当作基线。\n\n第二步，在 Canvas 下创建一个 Sprite 节点，给它指定一张图片。复制这个 Sprite，让屏幕上出现十几个相同图片的小图标，并让它们相邻摆放。再次运行预览，观察 2D batches 和 render calls 是否变化。因为这些 Sprite 使用相同资源，并且在节点顺序上相邻，Cocos 通常更容易合并它们的 2D 绘制。\n\n第三步，插入一个使用不同图片的 Sprite 到这些相同图标中间，再观察数字。你要看的不是某个固定数值，而是“相同图标连续排列”和“中间插入不同绘制状态”之间，批次或提交次数是否出现变化。\n\n最后，把这次练习写成一句结论：我改动了什么，哪个数字跟着变了，画面是否真的更顺。只要能说清这三件事，就已经完成今天的目标。你不需要把所有 Profiler 项目都背下来，先学会用数字支持判断即可。",
+  "misconceptions": [
+    "“Profiler 里某个数字高，就说明它一定是瓶颈。”不对。性能数字只是线索，必须结合场景现象和前后对比才能判断。",
+    "“批次越少，性能一定越好。”不对。批次减少通常有帮助，但如果主要耗时在脚本、阴影、像素填充或资源加载，画面仍可能没有明显改善。"
   ],
-  "workflow": {
-    "title": "AI 研发工作流追踪",
-    "items": [
-      {
-        "heading": "Arm 将神经图形、AI 与移动游戏工具放入同一工作流视角",
-        "body": "Arm 在 GDC Festival of Gaming 2026 总结中介绍神经图形、AI 与 Arm 工具在移动游戏开发中的结合，涵盖面向开发者的工具链和设备端图形工作流。",
-        "url": "https://newsroom.arm.com/blog/takeaways-from-gdc-festival-of-gaming-2026"
-      }
-    ]
-  },
-  "trend": {
-    "title": "AI 游戏行业正从单点生成实验转向平台化创作者工具、资产生态交易和基础设施投入，但组织层面的采用仍受岗位变化与披露要求牵制。",
-    "points": [
-      "发行商开始把 AI 内容生成工具和创作者分发能力作为新的业务主线。",
-      "游戏引擎、资产平台与 AI 代理逐步组合成可发布、可测试的端到端创作流程。",
-      "AI 投入扩大与团队治理并行推进，开发者对效率收益、岗位结构和透明披露的态度仍然分化。"
-    ]
-  }
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 Manual: Profiler",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/advanced-topics/profiler.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 Manual: Native Performance Profiler",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/advanced-topics/native-profiler.html"
+    }
+  ]
 }
