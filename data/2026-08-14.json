@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-14",
+  "tags": ["textures"],
+  "title": "纹理放大为何变糊：认识过滤与 Mipmap",
+  "summary": "同一张图片在不同尺寸下会呈现锐利、平滑或闪烁；今天用纹理采样设置建立这层直觉。",
+  "intuition": "把纹理想成一张由许多小方格组成的纸。屏幕上的一个像素，常常落在纸上的两个或更多方格之间。点采样像是只问‘离我最近的那一格是什么颜色’，边缘会很硬，也容易出现锯齿；线性采样则把附近几格的颜色按距离混合，放大时更平滑，但细节会显得柔和。\n\n缩小时还有另一个问题：一小块屏幕可能对应原图中很大的一片区域。如果 GPU 仍只从原图挑几个点，细密图案会在相邻帧之间忽明忽暗，这就是常说的闪烁或摩尔纹。Mipmap 可以理解为提前准备的‘缩小版纹理’：原图之外，再存一张半大、四分之一大的版本，渲染时按物体在屏幕上的大小选择更合适的版本。它不是把原图永久变糊，而是让远处或很小的表面使用更稳定的细节。\n\n今天只抓住一个核心判断：过滤决定‘一个采样点怎样取颜色’，Mipmap 决定‘缩小时从哪一个尺寸的纹理取颜色’。两者经常一起出现，但不是同一件事。",
+  "cocos": "在 Cocos Creator 3.x 中，图片导入后会成为 Texture 资源；SpriteFrame 保存其中要显示的矩形区域，Sprite 组件再把它绘制到节点上。过滤和 Mipmap 属于 Texture 资源的采样设置，而不是 Sprite 节点的 Transform 设置。\n\n选中资源管理器里的纹理，在 Inspector 中查看过滤相关选项。不同 3.x 小版本的字段组织可能略有差异：有的界面把它归在 Filter Mode 下，有的会分别显示 Min Filter、Mag Filter 或 Mip Filter。含义可以这样读：Mag（放大）关注纹理比屏幕像素更小时如何放大；Min（缩小）关注纹理被压缩到更小时如何取样；Mip 则决定缩小时是否在不同 Mipmap 层级之间过滤。Point/Nearest 倾向保留方格边界，Linear/Bilinear 会混合邻近颜色。\n\nMipmap 通常更适合 3D 场景中的地面、墙面和远处模型纹理，因为这些表面在屏幕上会逐渐变小。纯 2D 像素风图标常常希望保持硬边，开启线性过滤反而会让像素边界变软；是否启用 Mipmap 也要看资源用途和平台内存预算。Cocos Creator 3.8 LTS 的具体可用字段以当前编辑器 Inspector 和目标渲染管线为准，导入设置修改后要等待资源重新导入，再运行预览验证。",
+  "exercise": "在一个空的 Cocos Creator 3.x 2D 项目中做一个对比场景。\n\n1. 准备一张黑白棋盘格或像素风 PNG，导入项目后在 Canvas 下创建两个 Sprite 节点。把同一个 SpriteFrame 拖给两个 Sprite；把它们左右排列，初始尺寸先保持相同。\n2. 选中纹理资源，记录当前过滤设置。复制一份纹理资源或先记下原值，然后把左侧使用 Point/Nearest 的设置，右侧使用 Linear/Bilinear 的设置。若当前版本没有独立的 Point/Linear 文案，选择含义相同的最近邻与线性选项即可。\n3. 运行预览，逐步把两个 Sprite 的 UITransform Width 和 Height 放大到原来的 4 倍、8 倍。观察左侧边缘是否保持方格，右侧是否出现平滑过渡；这一步是在看 Mag（放大）效果。\n4. 再把两个 Sprite 缩小到很小，或在一个 3D 场景中把同一纹理贴到 Plane 后拉远相机。若 Inspector 提供 Mipmap 开关，在开启和关闭之间比较远处细密图案的稳定性。不要期待每台设备都出现完全相同的数值，重点观察图案是否更容易闪烁。\n\n练习结束时写下三句话：我改变了哪个 Texture 设置；它主要影响放大还是缩小；画面变化是边缘变软、方格变硬，还是远处闪烁减少。这样就把设置名称和实际现象对应起来了。",
+  "misconceptions": [
+    "“Linear 过滤会增加原图分辨率，所以一定更清晰。”不对。它只是用邻近纹素混合颜色，放大后通常更平滑，但不会创造新的真实细节。",
+    "“Mipmap 是所有 2D 图片都应该打开的画质开关。”不对。它主要解决缩小采样的稳定性，会增加纹理内存；像素风 UI 是否使用它，应根据目标尺寸和风格验证。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 Manual: Texture Assets",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/asset/texture.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 API: gfx Filter and MipFilter",
+      "url": "https://docs.cocos.com/creator/3.8/api/en/classes/gfx.Filter.html"
+    }
+  ]
+}
