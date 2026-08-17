@@ -1,4 +1,4 @@
-﻿{
+{
     "tags":  [
                  {
                      "id":  "render-pipeline",
@@ -42,6 +42,13 @@
                  }
              ],
     "reports":  [
+                    {
+                        "date": "2026-08-17",
+                        "file": "2026-08-17.json",
+                        "tags": ["camera-ui", "performance"],
+                        "title": "物体明明在场景里，为何突然消失：认识相机裁剪面",
+                        "summary": "模型没有被删除却看不见时，先用相机的 Near 和 Far 裁剪距离判断它是否还在可见范围内。"
+                    },
                     {
                         "date": "2026-08-14",
                         "file": "2026-08-14.json",
