@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-18",
+  "tags": ["materials", "render-pipeline"],
+  "title": "同一套渲染规则，为何能有不同外观：认识 Effect 与 Material 的分工",
+  "summary": "把 Effect 看作绘制规则，把 Material 看作可编辑参数，理解同一模型为何能快速换色、换贴图或换明暗方式。",
+  "intuition": "想象一间小型印刷工作室。Effect 像一台已经装配好的印刷机：它规定纸张怎样进入、哪些颜料会参与、颜色怎样混合，以及最终怎样落到纸上。Material 则像这台机器今天收到的一张工单：这次使用哪张图、主色是什么、粗糙还是发亮。换一张工单，机器的工作步骤没有重写，成品却可以从红色塑料球变成蓝色金属球。\n\n这正是初学渲染时最容易混淆的一对概念。Shader 是运行在 GPU 上的小程序，负责计算一个模型的顶点该到哪里、屏幕上的像素该是什么颜色。Cocos Creator 把它和一些绘制配置组织成 Effect。不要把 Effect 只理解成“特效”：在这里，它更像一份可供材质使用的渲染规则。Material 是把这份规则所需的数据填好后的资源，例如纹理、颜色、光照相关参数。\n\n可以用一个更小的例子区分它们。假设两只完全相同的方块都遵循“用一张图片乘上主颜色”的规则。第一只填入木纹和橙色，第二只填入石纹和灰色。规则相同，方块外观不同；不同的是两份 Material 数据，而不是每个方块都写了一遍 Shader。反过来，若要从“受灯光影响”变成“永远保持平面颜色”的计算方式，通常需要换用另一套 Effect，或者使用其提供的开关，而不只是把颜色滑块拖一下。\n\n为什么不是直接在每个节点上列出所有可能的颜色、贴图和算法？因为渲染规则可能非常不同。一个不受光的 UI 图像只需要少量颜色与纹理数据；一个受灯光影响的金属模型，还可能需要法线纹理、金属度和粗糙度；一个水面又会需要自己的时间和波纹参数。若节点固定拥有一张包含所有选项的面板，大部分字段会没有意义。让 Effect 先声明“我需要哪些输入”，再让 Material 保存这些输入，编辑器就能给不同规则显示不同而且有用的控制项。\n\n因此可以先记住一条实用判断：想调同一类外观的具体数值，先找 Material；想知道“允许调哪些数值、GPU 按什么方法算”，再追到 Effect 和 Shader。它能避免两个常见挫败：在节点 Inspector 里反复找颜色却找不到，或把一个 Material 的改动误以为只会影响当前模型。\n\n这里的“同一套规则”也不等于画面一定完全一样。灯光、相机、阴影、透明度和绘制顺序仍会参与最终结果。本篇只建立 Material 与 Effect 的边界：前者主要提供数据，后者主要定义计算和可用参数。先把这层关系弄清，之后学习渲染状态、光照和自定义 Shader 时就不会把每个面板都当成互不相关的按钮。",
+  "cocos": "本文以 Cocos Creator 3.8 LTS 为准。官方材料系统概览把 Material 描述为 Shader 的数据集，方便在编辑器中调整；它用来描述物体表面的外观。Shader 章节说明，顶点与片元代码片段在 GPU 上执行，分别参与几何位置和像素颜色的计算。两句话合起来，就是：Material 不需要让美术或关卡制作人员直接改 GPU 程序，也能给同一类渲染规则提供不同的数据。\n\n在编辑器里，先从资源而不是节点开始找这层关系。在 Assets 面板创建或选中一个 Material 资源，Inspector 会显示它当前使用的 Effect；官方 Material assets 文档明确说明，Material 可以作为 Effect 资源的容器，并可从 Effect 属性右侧的选择框切换所用 Effect。选定 Effect 后，Material Inspector 中出现的可编辑项目并不是随机生成的。Effect 所定义的属性，才有机会变成这份 Material 可填写的参数。不同 Effect 的参数集合不同，所以切换 Effect 后，原来能看见的颜色、纹理或开关可能变化，甚至不再适用。\n\n这也解释了为什么有时 Material Inspector 的一个字段会是灰色、消失，或在切换 Effect 后恢复默认值：不是编辑器在随意丢失你的工作，而是旧数据未必能被新规则解释。做日常调色时，尽量保留项目原本选用的 Effect，只改变当前 Material 已开放的参数；若必须切换规则，先复制 Material，当作一次可回退的实验。这样即使新 Effect 不适合当前模型，也能马上重新指回原资源。\n\n再回到场景节点。3D 模型通常由 MeshRenderer 组件的 Material 槽位引用 Material 资源；一个模型可以有多个槽位，因为模型的不同表面可以分别使用不同 Material。此时节点并不“保存一套独立的材质颜色”，它保存的是对资源的引用。把同一份 Material 赋给两个 Cube，随后在资源 Inspector 改一个可见参数，两个 Cube 都可能一起变化。这不是引擎出错，而是共享资源在正常工作。若只想让其中一个外观不同，应在 Assets 中复制 Material，再把副本只赋给那一个槽位。\n\n把共享和复制分开，有助于做出稳定的选择。大量完全相同的道具共用一份 Material，便于统一修改，也更容易满足批处理需要的“材质相同”条件；但把每个物体都随手复制成独立 Material，会增加管理负担，也可能破坏原本连续的批处理条件。另一方面，确实需要每个角色有不同衣服颜色或不同贴图时，复制或另建 Material 就是合理的。是否共用取决于外观是否真的应当一起变化，不是“副本越多越安全”。\n\n还要分清 Effect 与 Material 的修改成本和风险。调整 Material 暴露出来的颜色、纹理或数值，通常是在给既有规则换数据，适合日常外观迭代。修改或编写 Effect 则会涉及 YAML 配置、着色器代码、Pass 和渲染状态，属于更底层的渲染规则设计。它能创造新的画法，但不是为了把 Cube 变成蓝色而必须迈出的第一步。初学者看到 Inspector 中的 Effect 名称时，最有用的动作是先确认它是什么规则，再观察它向 Material 开放了哪些参数；不要一开始就把内置 Effect 源码复制出来硬改。\n\n最后留意一个边界：Material 是资源，MeshRenderer 的 Material 槽位是组件引用，Effect 是资源所选用的渲染规则，Shader 是规则中的 GPU 代码。它们既不全是节点属性，也不是四个同义词。排查“改了却没变”时，按这个顺序检查最有效：我编辑的是不是实际被槽位引用的那份 Material？多个物体是否共用它？当前 Material 的 Effect 是否提供我正在改的参数？最后再检查灯光和相机是否让变化难以看见。",
+  "exercise": "在 Cocos Creator 3.8 的 Empty 3D 项目中做一次“共享与副本”实验，不需要写脚本。\n\n1. 在默认场景中放置两个 Cube，让它们左右分开且都在 Main Camera 画面内。给场景保留默认光源，先运行一次，确认两个 Cube 都能看见。\n2. 在 Assets 面板的空白处通过创建菜单新建一个 Material。选中它，在 Inspector 中找到 Effect 字段，观察当前选中的 Effect 和随后显示的参数区域。这里先不需要理解每个参数；只要确认“参数属于这份 Material，并受当前 Effect 决定”即可。若新建资源使用默认 PBR Effect，颜色相关字段的具体名字会随 Effect 和版本显示为对应的材质属性。\n3. 把这同一份 Material 分别拖到两个 Cube 的 MeshRenderer 组件的 Material 槽位。运行预览并回到 Material Inspector，修改一个明确可见的颜色参数，例如默认 PBR 材质提供的 Albedo/主颜色一类项目。两个 Cube 应当一起变化。观察到“一改两个都变”就是本练习的第一个证据：它们共用的是同一份 Material 资源。\n4. 在 Assets 面板复制该 Material，重命名为例如 Cube-B-Material。只把副本赋给右侧 Cube 的相同 Material 槽位。现在再选中副本，改成另一种明显颜色；重新预览时，左侧 Cube 应保持原来的外观，右侧 Cube 改变。这说明你换掉的是右侧引用的资源，而不是改了模型网格本身。\n5. 最后分别选中两份 Material，查看它们的 Effect 字段。不要急着更换 Effect，只记录两份 Material 可以采用同一种规则、却保存不同数据。若你暂时切换了一个完全不同的 Effect 后参数区域大幅改变，立刻切回原 Effect，并把它当成第二个观察：可编辑项的集合来自所选规则，不是 Cube 自动拥有的固定属性。\n\n完成后应当能说清三件事：两个 Cube 为什么会一起变；复制 Material 后为什么可以独立；Effect 切换为什么会改变 Inspector 中的参数。若预览没有变化，确认 Material 已拖到实际运行的 MeshRenderer 槽位，并确认改的是副本而不是仍被两边共同引用的原件。",
+  "misconceptions": [
+    "“Material 就是 Shader，只是名字不同。”不对。Shader 是 GPU 上执行的代码；Material 是为某个 Effect/Shader 规则提供具体数据、供编辑器调整的资源。",
+    "“在一个 Cube 上改 Material，应该只影响这个 Cube。”不一定。多个 MeshRenderer 槽位若引用同一份 Material 资源，修改资源会同时影响它们；需要独立外观时应复制并重新赋值。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Material System Overview",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/material-system/overview.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Material assets",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/asset/material.html"
+    }
+  ]
+}
