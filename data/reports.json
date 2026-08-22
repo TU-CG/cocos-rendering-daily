@@ -43,6 +43,16 @@
   ],
   "reports": [
     {
+      "date": "2026-08-22",
+      "file": "2026-08-22.json",
+      "tags": [
+        "camera-ui",
+        "render-pipeline"
+      ],
+      "title": "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
+      "summary": "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。"
+    },
+    {
       "date": "2026-08-21",
       "file": "2026-08-21.json",
       "tags": [
