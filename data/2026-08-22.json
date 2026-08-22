@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-22",
+  "tags": ["camera-ui", "render-pipeline"],
+  "title": "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
+  "summary": "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。",
+  "intuition": "想象一座剧场有几条不同颜色的通道：红色通道给演员，蓝色通道给布景，绿色通道给舞台提示牌。场内其实同时放着这些东西，但坐在不同座位的摄影师未必都该拍到它们。给每件东西贴上通道标签，就是 Layer；摄影师拿着一张允许拍摄的通道清单，就是相机的 Visibility。只有标签被清单允许的东西，才会进入这台相机的画面。\n\n这是一种“是否交给相机”的规则，不是一种视觉效果。把 Cube 放到 Layer A，又让相机只看 Layer B，Cube 没有被删除，没有变透明，也不是贴图出错；它只是没有被这台相机选中。相反，另一台允许 Layer A 的相机仍可以正常拍到它。同一个场景可以有多个观察者，每个观察者都有自己的允许清单。\n\n初学者常会问：既然相机已经能看到一个物体，为什么还要多一层筛选？因为游戏里的内容并不都服务同一种画面。主相机可能要画 3D 世界；一台小地图相机只应画地图标记；角色肖像预览相机只应画角色和背景板；有些辅助节点只给编辑器或特定效果使用。若每台相机都尝试画所有内容，画面会互相混入，也可能多做不必要的渲染工作。Layer 与 Visibility 就是一份简短而清晰的分组合同。\n\n可以把它与“开灯”再区分一次。光照决定一个已经进入画面的模型明不明亮；材质决定它按什么规则显色；相机的位置、朝向和裁剪面决定它是否落在镜头范围内；Layer 与 Visibility 则更早地问：这台相机是否有资格处理这个节点？它们都可能造成“看不见”，但原因完全不同。排错时若把它们混为一谈，就容易反复调灯光、改材质，却永远没有结果。\n\nLayer 的名字容易让人想到屏幕上的上下层级，但在这里不要把它直接等同于 UI 的前后遮挡。UI 里谁压在谁上面通常还受节点树顺序、UI 渲染规则等影响；相机 Visibility 处理的是“这个节点类别是否参与这台相机的渲染”。两个节点即使都能被同一台相机看见，也仍需由后续绘制顺序决定谁遮住谁。\n\n今天只掌握一个判断式即可：节点的 Layer 必须包含在相机的 Visibility 中，节点才有资格被那台相机渲染。它不是“物体存在”的证明，而是“物体对这台相机开放”的许可。遇到场景和预览画面不一致时，先把这条规则单独验证，能省去许多猜测。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。Cocos 的 Node 有 Layer 属性，Camera 组件有 Visibility 属性。编辑器把它们做成可勾选的层级列表：选中节点时，Layer 表示该节点属于哪些层；选中带 Camera 组件的节点时，Visibility 表示该相机准备渲染哪些层。运行时，引擎会用这两组信息做可见性过滤。只要二者存在至少一个相同的层，这个节点才会通过这一项检查。\n\n先把“节点”和“组件”分开。MeshRenderer、Sprite、Label 等组件负责提供可绘制的内容；Layer 属于它们所在的 Node。也就是说，通常不必分别给 Cube 的 MeshRenderer 和它的 Node 设两次 Layer。若一个可渲染节点挂在父节点下，检查时仍应以实际承载渲染组件的节点为准；为了避免初学阶段的歧义，练习里直接把 Layer 设在带 MeshRenderer 或 Sprite 的那个节点上。\n\nCocos 提供内置层，例如 DEFAULT、UI_2D 和 UI_3D；也可以在 Project -> Project Settings -> Layers 中定义项目自己的层。新建层不是为了让画面自动多出一层，而是给一组节点一个可筛选的名字。比如把小地图标记归到 Minimap，把主世界模型保持在 DEFAULT。之后，小地图相机只勾选 Minimap，主相机只勾选 DEFAULT，两个画面就能各自保持干净。项目需要什么分组才创建什么分组；不要为了“看起来专业”把每个节点都放进不同层。\n\nCamera 的 Visibility 是每台相机独立的。场景中有 Main Camera 和 Preview Camera 时，给两台相机勾选不同层，不会改变节点本身的模型、材质或 Transform。它只改变两台相机各自提交哪些节点。这个独立性正适合 RenderTexture 的监控窗、角色预览或小地图：目标相机写进 RenderTexture 前，先用 Visibility 缩小它需要观察的对象集合。\n\n这条规则与 2026-08-17 讲的 Near/Far 裁剪面有明确边界。Visibility 先按分类决定“要不要考虑这个节点”；裁剪面再决定“被考虑的节点是否在相机可见深度范围内”。一个 Cube 的 Layer 即使被勾选，仍可能因为在相机背后、在 Near/Far 外、位于画面边缘外而不出现。反过来，Cube 即使就在镜头前、距离也正确，只要其 Layer 未被 Camera Visibility 勾选，仍不会被这台相机画出。排错时把检查顺序固定为 Layer/Visibility、相机朝向和投影范围、Near/Far、最后才是材质和光照，效率会高得多。\n\nCanvas 与 UI 也遵循相机和层的工作方式，但不要把 Canvas 当成一张自动盖住所有 3D 内容的纸。Cocos 的 UI 渲染由 Canvas、UI_2D Layer 以及相机设置共同决定；若你有自定义相机，尤其要确认它的 Visibility 是否包含需要显示的层。默认项目能显示 UI，并不意味着后来添加的相机天然会显示 UI。反过来，为了做纯 3D 的预览相机，也常常有意不勾选 UI_2D，避免它把整套界面再次画进 RenderTexture。\n\nLayer 还有性能含义，但它不是性能魔法。把完全不应进入某台相机的节点排除掉，可以避免该相机后续为它进行更多可见性和渲染工作；不过实际帧时间还受模型数量、材质、光照、阴影、分辨率和脚本影响。先用 Layer 正确表达画面职责，再用 Profiler 验证是否真的改善，而不是为了追一个数字把所有内容藏起来。",
+  "exercise": "在 Cocos Creator 3.8 的 Empty 3D 项目中做一个不写代码的二相机实验。目标不是做出漂亮画面，而是亲眼确认“同一 Cube 对不同相机可以有不同的可见资格”。\n\n1. 保留默认的 Main Camera 和 Main Light，创建一个 Cube，放在 Main Camera 前方并运行预览，确认它正常可见。选中 Cube，在 Inspector 找到 Node 的 Layer，记录当前层。再选中 Main Camera，在 Camera 组件找到 Visibility，确认其中包含 Cube 当前所属的层。这是正常画面的基线。\n\n2. 在 Project -> Project Settings -> Layers 中新增一个用户层，命名为 PreviewOnly。回到 Cube，把它的 Layer 改为 PreviewOnly。不要同时改相机。重新预览时，Cube 应从 Main Camera 画面消失，但它仍留在 Hierarchy 中，Scene 视图也仍可选中。这个现象说明你改变的是“主相机是否允许它进入画面”，不是删除或破坏 Cube。\n\n3. 选中 Main Camera，在 Visibility 中勾选 PreviewOnly 后再运行。Cube 应立即重新出现。然后取消勾选，再运行一次，它会再次消失。每次只改变一个勾选项，这一步给出了最直接的因果证据：同一个节点、同一个位置、同一份材质，只有相机的允许清单不同。\n\n4. 创建第二个 Camera 节点，命名为 Preview Camera。将它摆到能看见 Cube 的位置，并把它的 Visibility 设为只包含 PreviewOnly；让 Main Camera 不包含 PreviewOnly。为了避免两个相机同时往主屏幕输出而干扰观察，可以暂时禁用 Main Camera，再启用 Preview Camera 运行预览，确认 Cube 可见；交换两台相机的启用状态，Cube 应随之消失。若你已经学过 RenderTexture，也可以让 Preview Camera 输出到 RenderTexture，在 UI Sprite 上查看它的独立画面。\n\n5. 做一个反例：保持 Main Camera 勾选 PreviewOnly，却把 Cube 移到镜头背后或 Far 之外。Cube 依旧会消失，说明 Visibility 不是唯一可见性条件。把 Cube 移回镜头前且裁剪范围内，它会恢复。现在你能区分两种现象：Layer 不匹配时改 Visibility 有效；位置或裁剪不对时，单改 Visibility 没有效。\n\n练习成功的标准不是记住默认层的所有名字，而是能清楚地说出：Cube 属于 PreviewOnly；只有 Visibility 包含 PreviewOnly 的相机才会尝试渲染它。若你的项目里需要小地图、头像预览或仅给某类相机显示的特效，就可以先用这条规则规划分组，再决定是否需要额外相机和 RenderTexture。",
+  "misconceptions": [
+    "“把节点放进某个 Layer 就会让它显示在更上面。”不对。Layer 与 Camera Visibility 首先控制相机是否处理该节点；前后遮挡和 UI 显示顺序是另外的问题。",
+    "“Camera Visibility 勾选了节点所在 Layer，节点一定能看见。”不对。它只通过了分类过滤；相机朝向、投影范围、Near/Far、组件启用状态、材质和光照仍可能让节点不可见。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Camera Component",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/editor/components/camera-component.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Layers",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/concepts/scene/layer.html"
+    }
+  ]
+}
