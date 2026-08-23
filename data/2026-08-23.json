@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-23",
+  "tags": ["camera-ui", "render-pipeline"],
+  "title": "两台相机为何互相盖住：认识 Camera Clear Flags",
+  "summary": "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。",
+  "intuition": "把屏幕想成一块可以反复擦写的白板。一帧游戏画面开始时，相机不是直接把所有东西贴到一张全新的纸上；它是在一块上一帧留下过痕迹的画板上工作。画板至少有两类重要记录：颜色记录每个像素现在是什么颜色；深度记录每个像素前面已经画了多远的东西。后者就像给每个像素贴了一张“目前最近物体距离”的小便签，用来决定后来的物体该不该遮住它。\n\nCamera 的 Clear Flags 可以理解为相机开画前的清理规则。它回答的不是“这台相机看谁”，而是“轮到这台相机画之前，白板上的旧颜色和深度便签要怎样处理”。选择 Solid Color，好比先把整块白板擦成一种指定颜色，并撕掉旧的深度便签；选择 Dont Clear，则是承认前一台相机留下的画面仍然是这次画面的起点；选择 Depth Only，则保留已有颜色，却把深度便签清掉，准备让这台相机重新判断谁在前谁在后。\n\n这件事在只有一台主相机时很容易被忽略。你看到的背景色、天空盒或场景画面总是很完整，便误以为屏幕每帧天然会自动清空。其实，这是主相机的清屏策略让它看起来像一张新画布。当场景出现第二台相机，例如小地图、角色预览、武器瞄准镜、分屏画面或后处理前后的相机时，顺序和清屏就会变成可见的规则。后一台相机若重新清除颜色，前一台已经画好的世界会被盖掉；若完全不清除，它又会继承前一台相机的结果。\n\n不要把“清除”理解成删除场景节点。Cube、UI 和灯光仍在场景树里，材质也没有被修改。清除的对象是 GPU 正在准备输出到屏幕的缓冲内容。下一帧仍会重新计算并绘制可见节点，所以把 Clear Flags 设成 Solid Color 并不会让物体永久消失；它只是规定在本帧这台相机绘制前，旧画面先从什么状态开始。\n\n一个很实用的判断顺序是：若整个背景忽然变成一块颜色，先看最后渲染的相机是否清除了颜色；若两个 3D 画面叠在一起时遮挡奇怪，再看后一台相机是否保留或清除了深度；若节点从某一台相机完全消失，才回到 Visibility、位置和裁剪面排查。Clear Flags 管的是画布起点，不是对象名单。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。在选中带 Camera 组件的节点后，可在 Inspector 的 Camera 组件中找到 Clear Flags、Clear Color 和 Priority。官方 Camera Component 手册把 ClearFlags 说明为每帧实际清除 framebuffer 哪些部分的标志；这正是本文所说的颜色与深度画板。不同 3.x 小版本的 Inspector 排版可能略有不同，但这些相机属性和基本含义相同。\n\n对初学者最有用的四种选项可以先这样理解。Dont Clear 是不主动清除，让这台相机接着当前缓冲内容绘制。Depth Only 是只清除深度，保留已有颜色；常用于希望保留底图、但让新一批 3D 物体重新参与遮挡判断的相机组合。Solid Color 会用 Clear Color 清理颜色，同时重置深度和模板相关内容，因此适合作为一组相机中最先画背景的那台。Skybox 则让天空盒承担背景清理的角色；是否看见天空还取决于场景的天空盒设置。先在编辑器里建立直觉即可，不必急着记住每个枚举名。\n\nPriority 决定多台相机的渲染先后，数值较高的 Camera 会较晚渲染。它与 Clear Flags 必须一起看：Priority 只回答“谁先谁后”，Clear Flags 才回答“轮到它时是否把前面的结果擦掉”。例如主相机先用深蓝色 Solid Color 画世界，优先级更高的叠加相机若也使用 Solid Color 和橙色，就会先把蓝色世界背景清成橙色，然后再画它自己能看见的内容。若把叠加相机改成 Dont Clear，主相机的蓝色结果就能作为它的底图保留下来。\n\n深度是初学阶段最容易漏掉的部分。颜色缓冲像最终照片，深度缓冲像照片背后的一份距离表。某个像素已经记录了近处的墙，后绘制的远处物体通常不能覆盖它。两台相机都画 3D 内容时，如果后一台相机没有按预期处理深度，它看到的物体可能因为旧距离记录而不绘制，或呈现与预期不同的遮挡。Depth Only 的价值正是保留颜色照片、重新开始这份距离表。它不是“只画深度、不画颜色”的开关，而是“开画前只清深度”的策略。\n\nUI 与相机叠加时也要避免一个误会：Clear Flags 不负责 UI 的节点前后顺序，也不会自动把 UI 变成透明。它只准备相机的输出缓冲。Canvas、UI_2D Layer、相机 Visibility、节点树顺序和组件自身的渲染规则仍共同决定 UI 是否出现、出现在哪里。遇到“第二台相机把界面或世界盖没了”，先记录两台相机的 Priority 与 Clear Flags，再确认各自 Visibility；一次只改一个属性，才能知道问题来自清屏还是可见性。\n\n从性能角度说，不清除并不天然更快，也不是叠加画面的通用答案。它是否合适取决于你是否真的需要前一台相机的颜色和深度结果，以及后续相机画了多少内容。正确的目标是清楚规定每台相机的职责：哪一台建立背景，哪一台叠加内容，哪一台专门输出到 RenderTexture。画面正确后，再用 Profiler 判断是否存在值得优化的成本。",
+  "exercise": "在 Cocos Creator 3.8 的 Empty 3D 项目中完成一次“双相机接力”实验。这里不需要代码；重点是从最终画面反推两台相机对同一块画布做了什么。\n\n1. 保留默认的 Main Camera、Main Light 和场景中的 Cube（没有 Cube 时创建一个，并放在 Main Camera 前方）。选中 Main Camera，在 Camera 组件把 Clear Flags 设为 Solid Color，把 Clear Color 设为明显的深蓝色，并记下它的 Priority。运行预览：Cube 应显示在深蓝背景上。这说明主相机在本帧开始时先建立了一个确定的颜色画布。\n\n2. 复制 Main Camera 节点，重命名为 Overlay Camera。让两台相机都朝向 Cube，并把 Overlay Camera 的 Priority 设得比 Main Camera 高，例如 Main Camera 为 0、Overlay Camera 为 1。先把 Overlay Camera 的 Clear Flags 也设为 Solid Color，Clear Color 设为明显的橙色。重新预览后，最终背景应主要呈现橙色，而不是深蓝色；Cube 仍可能可见，因为后一台相机也会绘制它。观察的关键是：优先级更高的相机后来执行，它的清屏覆盖了先前相机留下的背景。\n\n3. 保持 Overlay Camera 的 Priority 不变，只把它的 Clear Flags 改为 Dont Clear，再运行。此时最终背景应回到 Main Camera 建立的深蓝色，Overlay Camera 在这块已经存在的画布上继续绘制。若 Cube 的细节略有变化，不必把它当作失败：两台相机都在绘制同一物体，实际结果还会受深度测试、相机 Transform 和项目设置影响。练习要证明的是“后相机不再主动擦掉颜色”，而不是用两台相机做完全相同的画面。\n\n4. 再把 Overlay Camera 的 Clear Flags 设为 Depth Only，运行并与 Dont Clear 对比。你通常仍会看到主相机留下的深蓝背景，因为颜色没有被清除；但深度记录已被重置，Overlay Camera 的 3D 内容会从新的深度判断开始。这个步骤不必追求某个固定的视觉差异，它是在把“保留颜色”和“保留深度”拆开看。\n\n5. 最后禁用 Overlay Camera，确认画面立即回到第一步的深蓝背景。然后重新启用它，并在两种 Clear Flags 间切换。只要能稳定预言“Solid Color 的后相机会覆盖前面的背景，Dont Clear 会保留前面的背景”，练习就成功了。把你的观察写成一句话：Priority 决定谁后画，Clear Flags 决定后画的相机是否从前一台相机的结果开始。\n\n如果画面与预期不符，先确认两台 Camera 都处于启用状态且 Priority 确实不同；再确认 Overlay Camera 的 Clear Color 与主相机的颜色足够不同。不要同时修改 Cube 的 Layer、Camera Visibility、位置和材质，否则会把清屏实验变成另一类可见性排错。",
+  "misconceptions": [
+    "“Dont Clear 就是透明相机。”不对。它表示这台相机不主动清除已有缓冲；它之后绘制的不透明 3D 物体仍会覆盖相应像素，最终结果还受绘制顺序和深度测试影响。",
+    "“Depth Only 会让相机只输出深度、看不到颜色。”不对。它描述的是绘制前清除了什么。相机后续仍会按自己的可见内容正常绘制颜色，只是沿用了此前的颜色画布。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Camera Component",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/editor/components/camera-component.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 API: CameraClearFlag",
+      "url": "https://docs.cocos.com/creator/3.8/api/en/enum/CameraClearFlag.html"
+    }
+  ]
+}
