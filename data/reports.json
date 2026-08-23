@@ -43,6 +43,16 @@
   ],
   "reports": [
     {
+      "date": "2026-08-23",
+      "file": "2026-08-23.json",
+      "tags": [
+        "camera-ui",
+        "render-pipeline"
+      ],
+      "title": "两台相机为何互相盖住：认识 Camera Clear Flags",
+      "summary": "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。"
+    },
+    {
       "date": "2026-08-22",
       "file": "2026-08-22.json",
       "tags": [
