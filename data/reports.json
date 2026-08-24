@@ -43,6 +43,15 @@
   ],
   "reports": [
     {
+      "date": "2026-08-24",
+      "file": "2026-08-24.json",
+      "tags": [
+        "camera-ui"
+      ],
+      "title": "UI 为什么有时总在最上面：认识 Canvas 的 Render Mode",
+      "summary": "理解 Canvas 的 Overlay 与 Camera 渲染模式，排查 UI 明明存在却不显示、或与 3D 画面叠放不符合预期的问题。"
+    },
+    {
       "date": "2026-08-23",
       "file": "2026-08-23.json",
       "tags": [
