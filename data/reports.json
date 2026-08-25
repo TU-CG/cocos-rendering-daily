@@ -43,6 +43,15 @@
   ],
   "reports": [
     {
+      "date": "2026-08-25",
+      "file": "2026-08-25.json",
+      "tags": [
+        "materials"
+      ],
+      "title": "颜色是谁算出来的：第一次认识 Shader",
+      "summary": "把 Shader 理解为 GPU 上逐点执行的着色规则，分清它、Effect 与 Material 各自负责什么。"
+    },
+    {
       "date": "2026-08-24",
       "file": "2026-08-24.json",
       "tags": [
