@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-26",
+  "tags": ["materials"],
+  "title": "模型表面的配方放在哪里：认识 MeshRenderer 的材质槽",
+  "summary": "从 MeshRenderer 的 Materials 槽位出发，弄清模型、材质资源与最终表面外观怎样准确对应。",
+  "intuition": "把 3D 模型想成一个已经裁好的纸质玩具。它告诉引擎纸片是什么形状、哪里折起、哪里朝外，但它本身并没有规定每一块表面最终该呈现木头、金属还是蓝色油漆。材质就是表面外观的配方；而 MeshRenderer 的材质槽，则像贴在纸模型不同区域上的配方标签，告诉 Cocos 哪一部分该使用哪一份配方。\n\n初学时很容易把“模型”“节点”和“材质”当成同一个东西。其实它们解决的是不同问题：节点负责位置、旋转、缩放和层级；模型网格负责形状；材质负责表面如何被画出来。MeshRenderer 是把这些关系连起来的组件。它拿到节点上的网格与材质槽中的材质，交给渲染系统，再由相机把结果变成画面。没有合适的材质，网格仍有形状，但你很难控制它最终呈现的颜色、贴图和受光方式。\n\n“槽”可以先理解为固定编号的插口。一个简单 Cube 通常只需一份材质，所以你会看到一个可填写的 Materials 位置。一个较复杂的模型可以由多个子网格组成，例如人物的身体、衣服和武器被导出为不同部分。它就可能有多个材质槽：第 0 个槽给身体，第 1 个槽给衣服，第 2 个槽给武器。槽的顺序不是按你在场景里看见的左右上下排列，而是由网格资源中子网格的顺序决定。\n\n这个比喻也能解释一个常见现象：为什么改了一个 Cube 的颜色，另一个 Cube 也变了？若两个 MeshRenderer 的槽都引用同一份 Material 资源，编辑这份资源等于修改同一张配方卡，所有引用它的模型都会一起变化。反过来，给其中一个槽换成复制出的 Material，才是让它开始使用另一张独立配方卡。这里并不是 Cocos “把两个物体绑在一起”，而是它们明确共享了同一个资源。\n\n今天最该记住的因果链是：网格决定要画哪些表面，MeshRenderer 的槽决定每块表面取哪份 Material，Material 再把参数交给 Effect 和 Shader 计算。以后看到模型“整体颜色不对”“只有一部分贴图错了”或“改一个对象全都变了”时，不要先怀疑相机或 Shader 代码。先看该节点的 MeshRenderer，以及每个 Materials 槽实际引用了哪一份 Material。这是更短、更可靠的排查路径。",
+  "cocos": "本文以 Cocos Creator 3.8 LTS 为准。在 3D 节点上添加或选中 MeshRenderer 组件后，Inspector 中的 Materials 属性就是今天的重点。它保存的是 Material 资源的引用，而不是一串临时的颜色值。把一个 Material 从 Assets 面板拖入这个属性，本质上是在说：这个 Renderer 所绘制的相应网格部分，要按这份 Material 组织的 Effect、纹理和属性来渲染。\n\n先区分 Inspector 中两处容易混看的位置。选中场景里的 3D 节点时，你看到的是该节点的 MeshRenderer 组件，以及它的 Materials 槽。选中 Assets 面板中的 Material 资源时，你看到的是这份资源本身的 Effect 与可编辑属性。前者回答“这个模型正在用哪份材质”；后者回答“这份材质的参数是什么”。排错时在两处来回确认，比只盯着其中一个面板有效得多。\n\nMaterials 不一定永远只有一个元素。Mesh 的每个子网格会对应一个可渲染部分，Renderer 依照槽位把材质分配给这些部分。对刚开始使用的内置 Cube 而言，一个槽已经足够，因此它是观察引用关系的最佳练习对象。导入外部模型后，槽位数量可能增多；这通常不表示 Cocos 多创建了几个模型节点，而是原始网格包含多个子网格或表面分组。此时若只修改第一个槽的 Material，只有与第一个子网格对应的部分会改变。\n\n同一个 Material 资源可以被许多 MeshRenderer 同时引用。这是资源复用：当你编辑资源的颜色、贴图或其他暴露属性时，所有引用者都会得到相同变化。它适合一批外观本就一致的道具，也避免为每个对象保存重复配方。但当你想让一个对象独自变色，直接修改共享 Material 往往会误伤其他对象。编辑器阶段可复制 Material 并把副本指定给目标槽；运行时则应根据用途考虑 MaterialInstance，而不是每帧随意新建材质。\n\n也别把材质槽误认为“贴图槽”。纹理只是 Material 的一种输入数据；Material 还选择 Effect，并包含颜色、混合等与渲染相关的参数。给 Materials 槽换一份 Material，可能同时换掉贴图、受光规则和透明行为；只在 Material Inspector 中换一张纹理，则是保留同一份材质规则，替换其中一个输入。两种操作的影响范围不同，先明确自己要换的是整份表面配方还是配方中的一项材料，能减少许多误操作。\n\n实际检查顺序可以很朴素。模型外观异常时，先选中节点，确认 MeshRenderer 存在且启用；再查看 Materials 的每个槽是否为空、是否指向预期资源；随后在 Assets 中选中该 Material，检查它使用的 Effect 与可见属性；最后才回到贴图、光源、相机等更外层因素。若一个复杂模型只有局部不对，优先比较各槽引用的 Material，而不是把整个模型重新导入。这个顺序把“哪个部分被画错”与“哪份表面配方被用错”直接连起来。",
+  "exercise": "在 Cocos Creator 3.8 的 Empty 3D 项目中完成一次不写代码的材质槽对照实验。你需要保留默认的 Main Camera 和 Main Light，并创建两个 Cube，左右摆开，确保运行预览时两者都在镜头内。目标不是练习调色，而是确认一个槽引用的资源会影响哪些物体。\n\n1. 在 Assets 面板空白处创建一个 Material 资源。选中它，在 Inspector 中保留默认可用的 Effect，并把可见的主颜色或 Albedo 颜色改成醒目的蓝色。不同 3.8 小版本中属性分组文字可能略有不同，以 Material Inspector 中由当前 Effect 暴露的颜色属性为准。\n\n2. 依次选中两个 Cube。在各自 Inspector 的 MeshRenderer -> Materials 中，将刚创建的蓝色 Material 放入第一个槽。预览后，两个 Cube 都应显示为同一套蓝色外观，并仍会按照当前材质是否受光表现明暗。此时它们各有自己的 MeshRenderer，但两个槽引用的是同一个 Material 资源。\n\n3. 回到 Assets 面板，继续编辑这份蓝色 Material，把颜色改为红色。再次预览，两个 Cube 都应一起变红。观察重点是“同时变化”：它证明修改的是共享资源，而不是只给某个 Cube 写入了局部颜色。若只有一个 Cube 改色，先检查另一个 Cube 的 Materials 槽是否实际引用了相同资源。\n\n4. 复制这份 Material，得到一份独立副本。把副本指定给右侧 Cube 的第一个 Materials 槽，再把副本颜色改成绿色。预览时左侧 Cube 应保持红色，右侧 Cube 应变成绿色。现在你已经亲眼看到两件不同的操作：改同一份 Material 会影响所有引用者；替换某个 MeshRenderer 槽的引用，只会改变这个 Renderer 对应的表面。\n\n5. 最后故意清空右侧 Cube 的 Materials 槽，再观察编辑器和预览中的结果，然后立即把绿色副本拖回。不同项目默认资源与效果组合下，缺失材质的外观可能不同，因此不要把某一种具体颜色当作标准答案；你要确认的是，外观异常时该去检查的位置就是 MeshRenderer 的 Materials 槽。完成后把 Material 恢复好，避免把“空槽测试”遗留在自己的场景中。\n\n若你手头有一个含多个表面部分的导入模型，可在这个练习后查看它的 Materials 列表。逐个替换槽中的 Material，并观察哪一块表面变化。不要依赖猜测给槽命名；用一次可逆的颜色对照，建立该模型各子网格和材质槽的实际对应关系。",
+  "misconceptions": [
+    "“给节点换 Material 就是在换模型。”不对。网格仍是原来的形状；你改变的是 MeshRenderer 用来绘制其表面的配方。要换形状，应查看 Mesh 资源或模型节点；要换表面外观，才查看 Materials 槽。",
+    "“两个模型一起变色一定是编辑器出了问题。”通常不是。先检查它们的 Materials 槽是否引用同一份 Material。共享资源正是 Cocos 用来复用外观的正常机制；需要独立外观时再使用复制的 Material 或合适的 MaterialInstance。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS Manual: Material Assets",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/asset/material.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS API: MeshRenderer",
+      "url": "https://docs.cocos.com/creator/3.8/api/en/class/MeshRenderer.html"
+    }
+  ]
+}
