@@ -1,0 +1,23 @@
+{
+  "date": "2026-08-27",
+  "tags": ["render-pipeline", "materials"],
+  "title": "半透明物体谁先画：认识 3D 渲染排序组件",
+  "summary": "用 Sorting Layer 和 Sorting Order 控制半透明 MeshRenderer 的绘制先后，排查物体互相遮挡的问题。",
+  "intuition": "把屏幕想成一张透明胶片叠成的画。画家先放一张，再放下一张；后放的胶片会盖住或混入先放的颜色。半透明物体像带有透明区域的胶片：它不能只靠“离相机近就一定正确”来完成叠放，因为颜色混合取决于绘制先后。\n\n这就是“渲染排序”要解决的问题。排序不是改变物体在场景中的位置，也不是让相机改道，而是告诉渲染器：在一组可见物体中，谁应该先提交自己的像素，谁应该后提交。对不透明物体，深度测试通常已经能稳定处理遮挡；半透明物体则要把当前像素与已经在屏幕上的颜色混合，先后顺序就会直接影响结果。\n\n先分清两个容易混淆的词。排序图层（Sorting Layer）像几张大号透明胶片，先按图层分组；排序顺序（Sorting Order）像同一张胶片上的编号，编号越靠后，通常越晚绘制。它们是渲染队列中的规则，不是 Node 的父子层级，也不是 Camera 的 Visibility Layer。Node 层级决定组织关系，Camera Visibility 决定“有没有资格被这台相机看到”，Sorting 决定“已经被看到的可渲染物谁先画”。\n\n为什么不直接拖动物体，让它离相机远一点？因为真实项目中，两个 UI 牌面、特效和角色可能共用相机、位置还会随动画变化。用空间距离猜顺序既脆弱又难维护。Sorting 组件把“视觉叠放意图”写成明确的数据：例如角色特效属于 FX 图层，角色身体属于 Character 图层；同一图层内，血条的 order 比身体更高。\n\n今天只抓住一条因果链：透明材质决定像素需要混合，Sorting 组件决定相关 Renderer 的相对先后。若画面出现半透明物体互相盖错，先确认它们是否使用透明渲染技术，再检查是否需要显式的 Sorting Layer/Order；不要先改节点坐标或反复调相机。",
+  "cocos": "本文以 Cocos Creator 3.8 LTS 为准。官方文档把 Sorting 作为可添加到节点上的渲染排序组件：在属性检查器点击“添加组件”，选择 Sorting。该组件只对持有 MeshRenderer 或 SpriteRenderer 的节点生效，因此把它加到一个空父节点上，不会自动改变子节点的绘制顺序。\n\n组件有两个核心属性。Sorting Layer 是排序图层，下拉选项来自“项目设置 -> 排序图层”中预先建立的图层；Sorting Order 是同一排序图层内的优先级。先比较 Sorting Layer，再比较同层的 Sorting Order。文档示例让半透明 Cube、Sphere 和 SpriteRenderer 处在同一场景中，然后把后方 SpriteRenderer 移到更高的排序图层，或把 Cube 的 Sorting Order 调为 1，以观察它在渲染队列中的优先级变化。\n\n这里有一个版本边界：3.8 文档中的菜单名称是“项目设置 -> 排序图层”，组件名称是 Sorting；3.x 其他小版本的面板排版或默认图层名称可能不同。如果你的版本没有看到自定义排序图层，先确认选中的是项目设置里的排序相关页面，而不是节点的 Layer/Camera Visibility 页面。\n\nSorting 不是“强制所有像素无视深度”。它主要为半透明物体提供可控的相对绘制顺序，最终效果仍会受到材质的 BlendState、深度测试/写入以及相机可见性影响。一个不透明 Mesh 即使改变了 Sorting Order，也不代表它会穿过一个真正更近且通过深度测试的实体。把排序当作透明叠放的控制杆，而不是万能的穿墙开关。\n\n若使用脚本，官方示例从 cc 导入 Sorting 和 SortingLayers，把 Sorting 组件拖到脚本的 @property(Sorting) 引用中，再在 start 中设置 sortingLayer 与 sortingOrder；SortingLayers 可按名称取得图层索引，但运行时不能修改图层定义本身。零基础阶段先用 Inspector 完成实验，等你能预测结果后再阅读 API 示例。",
+  "exercise": "在 Cocos Creator 3.8 的 Empty 3D 项目做一个可逆的排序实验，不需要写代码。保留默认 Main Camera 和 Main Light。\n\n1. 在“项目设置 -> 排序图层”中新增一个图层，例如 FX。若你的版本已有可用的自定义图层，也可以直接使用。记下它在列表中的位置；练习只关心图层之间的先后，不要把名字当成固定 API。\n\n2. 在场景中创建 Cube 和 Sphere，让它们在相机前方部分重叠。为两者各创建或指定一个可使用透明渲染技术的 Material：在 Material Inspector 中选择内置 Effect 提供的透明/半透明技术（不同 3.8 小版本显示文字可能略有差异），并把颜色设成容易区分的红、蓝。确认 MeshRenderer 仍然启用。若透明设置暂时无法找到，可先保留两个不透明物体完成组件位置练习，再按文档示例检查透明技术选择。\n\n3. 选中 Cube 和 Sphere，各自通过“添加组件”加入 Sorting。先让两者处于同一个 Sorting Layer，Sorting Order 都保持 0，运行预览并记录当前重叠效果。此时你看到的是默认规则与场景顺序共同作用的结果，不要把它当作稳定的设计。\n\n4. 把 Sphere 的 Sorting Layer 改成刚创建的 FX，把 Cube 留在 default；再次预览。观察重叠区域是否按照图层优先级发生变化。改变 Sphere 的位置、旋转相机，再运行一次：空间关系变了，但你设置的排序意图仍然保留。若效果没有变化，先检查两个节点是否真的都有 MeshRenderer、Sorting，且材质确实走透明技术。\n\n5. 将两者改回同一个 Sorting Layer，只把 Cube 的 Sorting Order 设为 1，Sphere 保持 0。预览时重点观察同层内的相对优先级。再把 Cube 的值改为 -1，比较结果是否反转。完成后可删除测试图层或把组件保留为学习场景；不要把测试用的高 order 误留在正式场景。\n\n6. 最后做一次排错记录：分别关闭 Sorting 组件、把材质换回不透明、关闭节点。每次只改一个条件，写下“物体是否可见、是否透明、谁覆盖谁”。你会看到 Visibility、材质混合和 Sorting 是三件不同的事；只有在物体可见且使用透明混合时，排序的视觉差异才最容易观察。",
+  "misconceptions": [
+    "“Sorting Order 越大，物体就一定显示在所有东西最上面。”不对。它首先只在排序规则适用的 Renderer 之间比较；Camera Visibility、材质是否透明、深度测试/写入仍会影响最终像素。",
+    "“Sorting Layer 就是节点的 Layer。”两者用途不同。节点 Layer 参与相机 Visibility 过滤，Sorting Layer/Order 参与可渲染物之间的绘制先后；把节点换到另一个 Layer，不等于改变 Sorting。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS：3D 渲染排序组件",
+      "url": "https://docs.cocos.com/creator/3.8/manual/zh/engine/rendering/sorting.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS：Pass 可选配置参数（Rasterizer/Depth/Blend 状态）",
+      "url": "https://docs.cocos.com/creator/3.8/manual/zh/shader/pass-parameter-list.html"
+    }
+  ]
+}
