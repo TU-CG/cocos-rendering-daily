@@ -1,263 +1,273 @@
 {
-    "tags":  [
-                 {
-                     "id":  "render-pipeline",
-                     "label":  "渲染流程",
-                     "color":  "#007f82"
-                 },
-                 {
-                     "id":  "camera-ui",
-                     "label":  "相机。UI",
-                     "color":  "#306fa4"
-                 },
-                 {
-                     "id":  "textures",
-                     "label":  "纹理",
-                     "color":  "#b77a12"
-                 },
-                 {
-                     "id":  "materials",
-                     "label":  "材质",
-                     "color":  "#7b529e"
-                 },
-                 {
-                     "id":  "batching",
-                     "label":  "批处。",
-                     "color":  "#d85747"
-                 },
-                 {
-                     "id":  "lighting",
-                     "label":  "光照",
-                     "color":  "#8a7016"
-                 },
-                 {
-                     "id":  "post-processing",
-                     "label":  "后处。",
-                     "color":  "#a84b73"
-                 },
-                 {
-                     "id":  "performance",
-                     "label":  "性能分析",
-                     "color":  "#367b51"
-                 }
-             ],
-    "reports":  [
-                    {
-                        "date":  "2026-08-26",
-                        "file":  "2026-08-26.json",
-                        "tags":  [
-                                     "materials"
-                                 ],
-                        "title":  "模型表面的配方放在哪里：认识 MeshRenderer 的材质槽",
-                        "summary":  "从 MeshRenderer 的 Materials 槽位出发，弄清模型、材质资源与最终表面外观怎样准确对应。"
-                    },
-                    {
-                        "date":  "2026-08-25",
-                        "file":  "2026-08-25.json",
-                        "tags":  [
-                                     "materials"
-                                 ],
-                        "title":  "颜色是谁算出来的：第一次认识 Shader",
-                        "summary":  "把 Shader 理解为 GPU 上逐点执行的着色规则，分清它、Effect 与 Material 各自负责什么。"
-                    },
-                    {
-                        "date":  "2026-08-24",
-                        "file":  "2026-08-24.json",
-                        "tags":  [
-                                     "camera-ui"
-                                 ],
-                        "title":  "UI 为什么有时总在最上面：认识 Canvas 的 Render Mode",
-                        "summary":  "理解 Canvas 的 Overlay 与 Camera 渲染模式，排查 UI 明明存在却不显示、或与 3D 画面叠放不符合预期的问题。"
-                    },
-                    {
-                        "date":  "2026-08-23",
-                        "file":  "2026-08-23.json",
-                        "tags":  [
-                                     "camera-ui",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "两台相机为何互相盖住：认识 Camera Clear Flags",
-                        "summary":  "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。"
-                    },
-                    {
-                        "date":  "2026-08-22",
-                        "file":  "2026-08-22.json",
-                        "tags":  [
-                                     "camera-ui",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
-                        "summary":  "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。"
-                    },
-                    {
-                        "date":  "2026-08-21",
-                        "file":  "2026-08-21.json",
-                        "tags":  [
-                                     "textures",
-                                     "batching"
-                                 ],
-                        "title":  "零碎小图怎样更容易一起画：认识动态图集",
-                        "summary":  "理解动态图集如何在运行时把合适的小图放进共享纹理，并知道它为何不是自动合批的万能开关。"
-                    },
-                    {
-                        "date":  "2026-08-20",
-                        "file":  "2026-08-20.json",
-                        "tags":  [
-                                     "batching",
-                                     "materials"
-                                 ],
-                        "title":  "看起来一样的图标，为何还是分开画：认识批处理的材质边界",
-                        "summary":  "理解 2D UI 中“相同材质”不只是同一张图片；不同材质参数也会让连续图标另起一次绘制。"
-                    },
-                    {
-                        "date":  "2026-08-19",
-                        "file":  "2026-08-19.json",
-                        "tags":  [
-                                     "materials",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "为什么只想让一个物体变色，却全都变了：认识 MaterialInstance",
-                        "summary":  "让多个物体共享同一份材质，同时在运行时只改变其中一个物体的颜色，理解 Material 与 MaterialInstance 的边界。"
-                    },
-                    {
-                        "date":  "2026-08-18",
-                        "file":  "2026-08-18.json",
-                        "tags":  [
-                                     "materials",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "同一套渲染规则，为何能有不同外观：认识 Effect 与 Material 的分工",
-                        "summary":  "把 Effect 看作绘制规则，把 Material 看作可编辑参数，理解同一模型为何能快速换色、换贴图或换明暗方式。"
-                    },
-                    {
-                        "date":  "2026-08-17",
-                        "file":  "2026-08-17.json",
-                        "tags":  [
-                                     "camera-ui",
-                                     "performance"
-                                 ],
-                        "title":  "物体明明在场景里，为何突然消失：认识相机裁剪面",
-                        "summary":  "模型没有被删除却看不见时，先用相机的 Near 和 Far 裁剪距离判断它是否还在可见范围内。"
-                    },
-                    {
-                        "date":  "2026-08-14",
-                        "file":  "2026-08-14.json",
-                        "tags":  [
-                                     "textures"
-                                 ],
-                        "title":  "纹理放大为何变糊：认识过滤与 Mipmap",
-                        "summary":  "同一张图片在不同尺寸下会呈现锐利、平滑或闪烁；今天用纹理采样设置建立这层直觉。"
-                    },
-                    {
-                        "date":  "2026-08-13",
-                        "file":  "2026-08-13.json",
-                        "tags":  [
-                                     "performance"
-                                 ],
-                        "title":  "Profiler 里的数字在说什么：用证据定位渲染瓶颈",
-                        "summary":  "把性能统计当作排查线索，区分帧时间、绘制提交与三角形数量，不再看到一个数字就盲目优化。"
-                    },
-                    {
-                        "date":  "2026-08-12",
-                        "file":  "2026-08-12.json",
-                        "tags":  [
-                                     "performance"
-                                 ],
-                        "title":  "别只看 FPS：用一帧时间读懂卡顿",
-                        "summary":  "把帧率换算成每帧耗时，先学会用可观察的数据判断卡顿是否真的改善。"
-                    },
-                    {
-                        "date":  "2026-08-11",
-                        "file":  "2026-08-11.json",
-                        "tags":  [
-                                     "render-pipeline",
-                                     "camera-ui"
-                                 ],
-                        "title":  "不直接上屏的相机画面：认识 RenderTexture",
-                        "summary":  "让相机先把画面写进一张纹理，再显示到 UI，建立离屏渲染的第一层直觉。"
-                    },
-                    {
-                        "date":  "2026-08-10",
-                        "file":  "2026-08-10.json",
-                        "tags":  [
-                                     "post-processing"
-                                 ],
-                        "title":  "画面已经画完还能改变吗：认识全屏后处理",
-                        "summary":  "把相机输出当成一张照片再处理，理解后处理的位置、开关和最小验证方法。"
-                    },
-                    {
-                        "date":  "2026-08-09",
-                        "file":  "2026-08-09.json",
-                        "tags":  [
-                                     "lighting"
-                                 ],
-                        "title":  "阴影为什么不出现：看懂动态阴影的三道开。",
-                        "summary":  "用场景、光源和物体的三处设置，建立动态阴影从产生到落地的排错顺序。"
-                    },
-                    {
-                        "date":  "2026-08-08",
-                        "file":  "2026-08-08.json",
-                        "tags":  [
-                                     "lighting"
-                                 ],
-                        "title":  "为什么挪不动太阳：认识方向光的方。",
-                        "summary":  "用一盏方向光理解 3D 物体为什么会有明暗，以及为何旋转光源比移动它更重要。"
-                    },
-                    {
-                        "date":  "2026-08-07",
-                        "file":  "2026-08-07.json",
-                        "tags":  [
-                                     "batching",
-                                     "performance"
-                                 ],
-                        "title":  "为什么一排相同图标更省力：认。2D 批处。",
-                        "summary":  "理解 Cocos 如何把条件相同的连续 UI 绘制合并，减。CPU 。GPU 发出的工作指令。"
-                    },
-                    {
-                        "date":  "2026-08-06",
-                        "file":  "2026-08-06.json",
-                        "tags":  [
-                                     "materials",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "半透明为什么会乱：认识深度、混合与绘制顺序",
-                        "summary":  "从半透明 UI 的叠色现象出发，理解渲染状态如何决定遮挡关系与颜色混合。"
-                    },
-                    {
-                        "date":  "2026-08-05",
-                        "file":  "2026-08-05.json",
-                        "tags":  [
-                                     "materials"
-                                 ],
-                        "title":  "材质是什么：给物体一份可复用的外观配。",
-                        "summary":  "理解材质、纹理和着色器的分工，让同一个模型呈现不同表面效果。"
-                    },
-                    {
-                        "date":  "2026-08-04",
-                        "file":  "2026-08-04.json",
-                        "tags":  [
-                                     "textures"
-                                 ],
-                        "title":  "一张图片为何能显示：认。Texture 。SpriteFrame",
-                        "summary":  "从导入图片到 Sprite 显示，建立纹理资源、裁剪范围和 UI 图像组件的基本分工。"
-                    },
-                    {
-                        "date":  "2026-08-03",
-                        "file":  "2026-08-03.json",
-                        "tags":  [
-                                     "camera-ui"
-                                 ],
-                        "title":  "相机决定你看见什么：。3D 物体。UI 同时出现在屏幕上",
-                        "summary":  "理解相机、节点图层与 Canvas 的分工，排查“节点存在却看不见”的第一类问题。"
-                    },
-                    {
-                        "date":  "2026-07-31",
-                        "file":  "2026-07-31.json",
-                        "tags":  [
-                                     "render-pipeline"
-                                 ],
-                        "title":  "从场景到屏幕：Cocos 怎样把节点变成画。",
-                        "summary":  "先建立一张最重要的地图：场景里的节点并不会直接出现在屏幕上。"
-                    }
-                ]
+  "tags": [
+    {
+      "id": "render-pipeline",
+      "label": "渲染流程",
+      "color": "#007f82"
+    },
+    {
+      "id": "camera-ui",
+      "label": "相机。UI",
+      "color": "#306fa4"
+    },
+    {
+      "id": "textures",
+      "label": "纹理",
+      "color": "#b77a12"
+    },
+    {
+      "id": "materials",
+      "label": "材质",
+      "color": "#7b529e"
+    },
+    {
+      "id": "batching",
+      "label": "批处。",
+      "color": "#d85747"
+    },
+    {
+      "id": "lighting",
+      "label": "光照",
+      "color": "#8a7016"
+    },
+    {
+      "id": "post-processing",
+      "label": "后处。",
+      "color": "#a84b73"
+    },
+    {
+      "id": "performance",
+      "label": "性能分析",
+      "color": "#367b51"
+    }
+  ],
+  "reports": [
+    {
+      "date": "2026-08-27",
+      "file": "2026-08-27.json",
+      "tags": [
+        "render-pipeline",
+        "materials"
+      ],
+      "title": "半透明物体谁先画：认识 3D 渲染排序组件",
+      "summary": "用 Sorting Layer 和 Sorting Order 控制半透明 MeshRenderer 的绘制先后，排查物体互相遮挡的问题。"
+    },
+    {
+      "date": "2026-08-26",
+      "file": "2026-08-26.json",
+      "tags": [
+        "materials"
+      ],
+      "title": "模型表面的配方放在哪里：认识 MeshRenderer 的材质槽",
+      "summary": "从 MeshRenderer 的 Materials 槽位出发，弄清模型、材质资源与最终表面外观怎样准确对应。"
+    },
+    {
+      "date": "2026-08-25",
+      "file": "2026-08-25.json",
+      "tags": [
+        "materials"
+      ],
+      "title": "颜色是谁算出来的：第一次认识 Shader",
+      "summary": "把 Shader 理解为 GPU 上逐点执行的着色规则，分清它、Effect 与 Material 各自负责什么。"
+    },
+    {
+      "date": "2026-08-24",
+      "file": "2026-08-24.json",
+      "tags": [
+        "camera-ui"
+      ],
+      "title": "UI 为什么有时总在最上面：认识 Canvas 的 Render Mode",
+      "summary": "理解 Canvas 的 Overlay 与 Camera 渲染模式，排查 UI 明明存在却不显示、或与 3D 画面叠放不符合预期的问题。"
+    },
+    {
+      "date": "2026-08-23",
+      "file": "2026-08-23.json",
+      "tags": [
+        "camera-ui",
+        "render-pipeline"
+      ],
+      "title": "两台相机为何互相盖住：认识 Camera Clear Flags",
+      "summary": "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。"
+    },
+    {
+      "date": "2026-08-22",
+      "file": "2026-08-22.json",
+      "tags": [
+        "camera-ui",
+        "render-pipeline"
+      ],
+      "title": "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
+      "summary": "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。"
+    },
+    {
+      "date": "2026-08-21",
+      "file": "2026-08-21.json",
+      "tags": [
+        "textures",
+        "batching"
+      ],
+      "title": "零碎小图怎样更容易一起画：认识动态图集",
+      "summary": "理解动态图集如何在运行时把合适的小图放进共享纹理，并知道它为何不是自动合批的万能开关。"
+    },
+    {
+      "date": "2026-08-20",
+      "file": "2026-08-20.json",
+      "tags": [
+        "batching",
+        "materials"
+      ],
+      "title": "看起来一样的图标，为何还是分开画：认识批处理的材质边界",
+      "summary": "理解 2D UI 中“相同材质”不只是同一张图片；不同材质参数也会让连续图标另起一次绘制。"
+    },
+    {
+      "date": "2026-08-19",
+      "file": "2026-08-19.json",
+      "tags": [
+        "materials",
+        "render-pipeline"
+      ],
+      "title": "为什么只想让一个物体变色，却全都变了：认识 MaterialInstance",
+      "summary": "让多个物体共享同一份材质，同时在运行时只改变其中一个物体的颜色，理解 Material 与 MaterialInstance 的边界。"
+    },
+    {
+      "date": "2026-08-18",
+      "file": "2026-08-18.json",
+      "tags": [
+        "materials",
+        "render-pipeline"
+      ],
+      "title": "同一套渲染规则，为何能有不同外观：认识 Effect 与 Material 的分工",
+      "summary": "把 Effect 看作绘制规则，把 Material 看作可编辑参数，理解同一模型为何能快速换色、换贴图或换明暗方式。"
+    },
+    {
+      "date": "2026-08-17",
+      "file": "2026-08-17.json",
+      "tags": [
+        "camera-ui",
+        "performance"
+      ],
+      "title": "物体明明在场景里，为何突然消失：认识相机裁剪面",
+      "summary": "模型没有被删除却看不见时，先用相机的 Near 和 Far 裁剪距离判断它是否还在可见范围内。"
+    },
+    {
+      "date": "2026-08-14",
+      "file": "2026-08-14.json",
+      "tags": [
+        "textures"
+      ],
+      "title": "纹理放大为何变糊：认识过滤与 Mipmap",
+      "summary": "同一张图片在不同尺寸下会呈现锐利、平滑或闪烁；今天用纹理采样设置建立这层直觉。"
+    },
+    {
+      "date": "2026-08-13",
+      "file": "2026-08-13.json",
+      "tags": [
+        "performance"
+      ],
+      "title": "Profiler 里的数字在说什么：用证据定位渲染瓶颈",
+      "summary": "把性能统计当作排查线索，区分帧时间、绘制提交与三角形数量，不再看到一个数字就盲目优化。"
+    },
+    {
+      "date": "2026-08-12",
+      "file": "2026-08-12.json",
+      "tags": [
+        "performance"
+      ],
+      "title": "别只看 FPS：用一帧时间读懂卡顿",
+      "summary": "把帧率换算成每帧耗时，先学会用可观察的数据判断卡顿是否真的改善。"
+    },
+    {
+      "date": "2026-08-11",
+      "file": "2026-08-11.json",
+      "tags": [
+        "render-pipeline",
+        "camera-ui"
+      ],
+      "title": "不直接上屏的相机画面：认识 RenderTexture",
+      "summary": "让相机先把画面写进一张纹理，再显示到 UI，建立离屏渲染的第一层直觉。"
+    },
+    {
+      "date": "2026-08-10",
+      "file": "2026-08-10.json",
+      "tags": [
+        "post-processing"
+      ],
+      "title": "画面已经画完还能改变吗：认识全屏后处理",
+      "summary": "把相机输出当成一张照片再处理，理解后处理的位置、开关和最小验证方法。"
+    },
+    {
+      "date": "2026-08-09",
+      "file": "2026-08-09.json",
+      "tags": [
+        "lighting"
+      ],
+      "title": "阴影为什么不出现：看懂动态阴影的三道开。",
+      "summary": "用场景、光源和物体的三处设置，建立动态阴影从产生到落地的排错顺序。"
+    },
+    {
+      "date": "2026-08-08",
+      "file": "2026-08-08.json",
+      "tags": [
+        "lighting"
+      ],
+      "title": "为什么挪不动太阳：认识方向光的方。",
+      "summary": "用一盏方向光理解 3D 物体为什么会有明暗，以及为何旋转光源比移动它更重要。"
+    },
+    {
+      "date": "2026-08-07",
+      "file": "2026-08-07.json",
+      "tags": [
+        "batching",
+        "performance"
+      ],
+      "title": "为什么一排相同图标更省力：认。2D 批处。",
+      "summary": "理解 Cocos 如何把条件相同的连续 UI 绘制合并，减。CPU 。GPU 发出的工作指令。"
+    },
+    {
+      "date": "2026-08-06",
+      "file": "2026-08-06.json",
+      "tags": [
+        "materials",
+        "render-pipeline"
+      ],
+      "title": "半透明为什么会乱：认识深度、混合与绘制顺序",
+      "summary": "从半透明 UI 的叠色现象出发，理解渲染状态如何决定遮挡关系与颜色混合。"
+    },
+    {
+      "date": "2026-08-05",
+      "file": "2026-08-05.json",
+      "tags": [
+        "materials"
+      ],
+      "title": "材质是什么：给物体一份可复用的外观配。",
+      "summary": "理解材质、纹理和着色器的分工，让同一个模型呈现不同表面效果。"
+    },
+    {
+      "date": "2026-08-04",
+      "file": "2026-08-04.json",
+      "tags": [
+        "textures"
+      ],
+      "title": "一张图片为何能显示：认。Texture 。SpriteFrame",
+      "summary": "从导入图片到 Sprite 显示，建立纹理资源、裁剪范围和 UI 图像组件的基本分工。"
+    },
+    {
+      "date": "2026-08-03",
+      "file": "2026-08-03.json",
+      "tags": [
+        "camera-ui"
+      ],
+      "title": "相机决定你看见什么：。3D 物体。UI 同时出现在屏幕上",
+      "summary": "理解相机、节点图层与 Canvas 的分工，排查“节点存在却看不见”的第一类问题。"
+    },
+    {
+      "date": "2026-07-31",
+      "file": "2026-07-31.json",
+      "tags": [
+        "render-pipeline"
+      ],
+      "title": "从场景到屏幕：Cocos 怎样把节点变成画。",
+      "summary": "先建立一张最重要的地图：场景里的节点并不会直接出现在屏幕上。"
+    }
+  ]
 }
