@@ -1,0 +1,17 @@
+{
+  "date": "2026-08-28",
+  "tags": ["lighting", "performance"],
+  "title": "阴影为何有锯齿或漂浮：认识阴影贴图分辨率与偏差",
+  "summary": "用 ShadowMapSize、PCF、Bias 与 Shadow Distance 解释阴影质量问题，并建立一套可重复的排查顺序。",
+  "intuition": "把阴影想成光源替场景拍的一张黑白照片。光源先从自己的视角记录“这里被挡住了”，再把这张照片投回相机画面；这张照片就是阴影贴图（Shadow Map）。照片像素太少，物体轮廓只能用大方格拼出来，于是边缘出现锯齿；照片要覆盖的世界范围太大，同样数量的像素被摊薄，远处阴影也会变糊。一个 texel（texture element，纹理像素）并不是一个“物体像素”，而是光源视角下的一小块世界面积；相机移动后，同一块世界可能落到不同 texel 上，所以边缘还可能轻微闪烁。\n\n“漂浮”或“表面长黑线”是另一类问题：记录阴影时，深度数值有微小误差，地面可能误以为自己挡住了自己。Bias 可以理解为给接收阴影的表面留出一点安全间隔，避免自相矛盾；Bias 过大又会让阴影像离开物体，产生漂浮。Normal Bias 沿着表面法线方向调整，主要帮助曲面减少条纹，但同样不能无限增大。看到条纹时先确认是接触面的自阴影，看到整片阴影与脚底分开时再怀疑 Bias 过头。\n\n最后还有边缘柔化。PCF（Percentage-Closer Filtering）会取阴影贴图附近多个采样点做平均：HARD 最锐利，SOFT、SOFT_2X、SOFT_4X 逐步增加柔和程度。它只能把锯齿“抹平”一些，并没有增加阴影贴图真正的细节；过度柔化还可能让小物体的阴影看起来发虚。可以用四个现象快速定位：完全没有阴影，先查三处 Enabled/Cast/Receive；只有远处模糊，先看 ShadowDistance；贴地面条纹，先看 Bias/Normal Bias；轮廓像马赛克，先看 ShadowMapSize。这样做的好处是每次只动一个原因，不会把多个旋钮一起改乱。",
+  "cocos": "在 Cocos Creator 3.8 LTS 中，阴影总开关位于场景节点的 Shadows 组件；方向光的 Dynamic Shadow Settings 里有 Shadow Enabled、ShadowPcf、ShadowBias、ShadowNormalBias、ShadowDistance 等属性。场景 Shadows 的 Type 选择 ShadowMap 后，还能设置 ShadowMapSize。官方 3.8 文档列出的尺寸是 Low_256x256、Medium_512x512、High_1024x1024、Ultra_2048x2048。\n\n可以把几个设置分成三组来记：\n1. 细节密度：ShadowMapSize 越大，每个阴影 texel（贴图像素）覆盖的世界面积越小，轮廓通常更清楚，但显存和生成阴影的成本会上升。\n2. 边缘观感：ShadowPcf 只改变边缘采样的柔和程度；它不是“更高分辨率”开关。\n3. 深度误差：ShadowBias 解决平面自阴影条纹，ShadowNormalBias 主要缓解曲面上的锯齿或自阴影伪影。数值应从很小的改动开始，因为过大就会出现阴影与接触物分离。\n\nShadowDistance 决定方向光阴影在相机可见范围内覆盖多远，官方说明其质量与该值成反比：范围拉得越远，同一张阴影贴图要服务的区域越大，单位面积的细节越少。实战中，室内小房间不必把范围设得像开放世界那么远；先让阴影覆盖玩家真正能看到的区域，再用贴图尺寸换取近处细节。若阴影只在相机边缘缺失，也要检查是否是覆盖范围问题，而不一定是 Cast/Receive 开关。\n\n3.3 起，Inspector 中的 Linear 与 Packing 选项已移除，由 Creator 根据硬件自动选择阴影渲染方式；因此在 3.8 教程里不要寻找这两个旧选项。不同平台的阴影成本也会不同：提高尺寸、增加 PCF 采样或扩大距离都可能增加 GPU 工作，最终应在目标设备上用 Profiler 验证，而不是只凭编辑器预览判断。",
+  "exercise": "1. 新建一个 3D 场景，保留 Main Camera，加入 Cube、Plane 和 Directional Light；把 Cube 放在 Plane 上方，确保相机能同时看到两者。再复制一个 Cube，放到画面较远处，帮助你观察距离对细节的影响。\n2. 选中场景根节点，在 Inspector 的 Shadows 组件勾选 Enabled，并把 Type 设为 ShadowMap。选中 Directional Light，在 Dynamic Shadow Settings 勾选 Shadow Enabled；两个 Cube 的 MeshRenderer 勾选 Cast Shadows，Plane 的 MeshRenderer 勾选 Receive Shadows。\n3. 运行预览，先把 ShadowMapSize 设为 Low_256x256，再依次改为 High_1024x1024；保持相机和光源不动，观察近处与远处 Cube 阴影边缘的细节变化。记录你看到锯齿明显减弱的尺寸，而不是只记“越大越好”。\n4. 把 ShadowPcf 在 HARD 与 SOFT_4X 之间切换。你应看到边缘从硬朗变得柔和，但细小轮廓不会凭空增加；如果远处阴影仍糊，回到尺寸或距离设置。\n5. 临时把 ShadowBias 调得明显偏大，再调回较小值；观察阴影是否从“贴着脚边”变成与 Cube 分离。若曲面物体出现条纹，可小幅调整 ShadowNormalBias。最后把 ShadowDistance 调大一倍，观察同一 ShadowMap 需要覆盖更大范围后，阴影细节是否下降，再恢复到能覆盖场景的最小值。\n6. 打开 Cocos 的性能统计（或目标平台 Profiler），分别记录 256 与 1024 设置下的帧时间变化。不同硬件结果会不同，这一步只用来建立“画质旋钮也有成本”的证据。\n\n练习的重点不是找一个适用于所有场景的神奇数值，而是一次只改一个旋钮，并记录“锯齿、条纹、漂浮、变糊”分别由哪个旋钮影响。完成后，你应该能按“先确认开关，再看覆盖范围，再调尺寸，最后微调 Bias/PCF”的顺序排查。",
+  "misconceptions": [
+    "把 ShadowPcf 当成提高分辨率。PCF 只做多次采样的边缘平滑；想获得更多轮廓细节，仍要考虑 ShadowMapSize 或缩小 ShadowDistance。",
+    "Bias 越大越安全。Bias 过大会让阴影脱离接触面，形成明显漂浮；应从小幅调整开始，并同时检查光源方向与 ShadowDistance。"
+  ],
+  "sources": [
+    {"title": "Cocos Creator 3.8 LTS：Shadows", "url": "https://docs.cocos.com/creator/3.8/manual/en/concepts/scene/light/shadow.html"},
+    {"title": "Cocos Creator 3.8 LTS：Directional Lights", "url": "https://docs.cocos.com/creator/3.8/manual/en/concepts/scene/light/lightType/dir-light.html"}
+  ]
+}
