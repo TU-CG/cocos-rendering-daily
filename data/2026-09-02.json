@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-02",
+  "tags": ["camera-ui"],
+  "title": "远近为何会变大小：认识相机的透视与正交投影",
+  "summary": "用两台相机观察透视与正交投影的差异，理解 3D 世界怎样被映射到屏幕并选择合适的相机模式。",
+  "intuition": "想象你拿着两种不同的相机拍同一排路灯。普通手机镜头会让远处的灯看起来更小，平行的道路边缘也会在远处汇拢；这就是透视投影。它符合我们日常看世界的感觉：物体离观察者越远，在照片上占的面积越小。\n\n另一种相机像工程制图用的扫描仪。它把世界中的平行线保持平行，物体无论离镜头远近，只要真实尺寸相同，投到画面上的尺寸就相同。这是正交投影。它不代表场景没有深度，而是刻意不让“距离”参与缩放，所以很适合棋盘、地图、建筑平面图和需要稳定尺寸的 2D/3D 混合界面。\n\n可以把投影理解成一把把 3D 尺子压到 2D 纸面上的规则。透视投影的尺子会随距离缩放；正交投影的尺子保持固定。相机的位置和旋转仍然会决定你看到哪一面、哪些物体被裁剪，但投影类型决定“远近是否改变大小”。\n\n这也解释了一个常见困惑：把透视相机的 FOV（视野角）调小，画面会像拉近镜头；把正交相机的 Ortho Height（正交高度）调小，画面会像放大地图。两者都能改变构图，却不是同一个参数。透视是在改变可见角度，正交是在改变一张没有透视缩放的取景框大小。",
+  "cocos": "在 Cocos Creator 3.x 中，Camera 组件的 Projection 属性决定投影方式，常见选项是 Perspective（透视）和 Orthographic（正交）。选择 Perspective 时，Field of View（FOV）控制相机的视野角；物体的最终屏幕大小还会随它与相机的距离变化。选择 Orthographic 时，使用 Orthographic Height 控制垂直方向的取景范围，距离不会让同尺寸物体自动变小。不同 3.x 小版本的 Inspector 排版可能略有差异，但判断字段的原则不变：先看 Projection，再看它下面显示的对应参数。\n\n投影只负责“如何把相机看到的空间映射到屏幕”，不负责决定节点是否有资格被看到。Node 的 Layer 与 Camera 的 Visibility 仍然会过滤可见对象，Near/Far 裁剪面仍然会裁掉太近或太远的内容；Canvas 的 Render Mode 还会影响 UI 使用哪条渲染路径。因此，一个 Cube 在正交相机里消失，不能直接归因于“正交没有深度”，应先检查相机位置、裁剪面和可见性。\n\nPerspective 更像真实镜头，适合角色、建筑和需要纵深感的 3D 游戏。Orthographic 适合俯视地图、策略棋盘、等距风格场景，也常用于需要稳定像素尺寸的界面预览。它们都能渲染 3D 网格和光照；正交并不会把场景变成 2D，也不会自动关闭阴影。\n\n项目可以同时放置两台相机。例如主相机用 Perspective 渲染角色，另一台相机用 Orthographic 拍摄小地图并输出到 UI。两台相机仍需分别配置 Visibility、Depth/Clear 设置和输出目标；仅仅切换 Projection 不会自动完成相机叠加或 RenderTexture 显示。",
+  "exercise": "在 Cocos Creator 3.x 的空 3D 项目中完成一次“双相机投影对照”，不需要写代码。保留默认 Main Camera 和 Main Light。\n\n1. 在场景中创建三个相同的 Cube，把它们沿着相机前方的 Z 方向排成近、中、远三处；让三个 Cube 的大小、材质和旋转保持一致。先用 Main Camera 的默认 Perspective 运行预览，记录近处 Cube 比远处 Cube 大多少。\n\n2. 复制 Main Camera，命名为 OrthoCamera，把它放到与 Main Camera 相近的位置和朝向。将 OrthoCamera 的 Projection 改为 Orthographic，调整 Orthographic Height，使三个 Cube 都能进入画面。运行时先只保留其中一台相机可见，避免把两幅画叠在一起。\n\n3. 在 OrthoCamera 画面中观察三个 Cube：它们的屏幕尺寸应比 Perspective 时更接近，远处 Cube 不会因为距离增加而明显缩小。移动 OrthoCamera 前后，再运行一次；画面内容会改变，但同尺寸 Cube 的投影大小基本保持不变。\n\n4. 切回 Perspective，把 FOV 从较大值改为较小值，记录画面边缘和远近大小的变化。再切回 Orthographic，把 Orthographic Height 调小，观察“放大取景框”与 FOV 改变的差异。每次只改一个参数，并记下你看到的是视野变窄、取景范围变小，还是远近比例改变。\n\n5. 做一次排错实验：把 OrthoCamera 的 Far 裁剪面调得小于最远 Cube，确认它会消失；再把 Far 调大恢复。这个现象说明投影类型和裁剪范围是两条独立规则。最后根据用途写下选择：主游戏镜头使用哪种投影，小地图或棋盘使用哪种投影，以及理由是什么。",
+  "misconceptions": [
+    "“正交投影就是没有 3D 深度。”不对。物体仍有位置、遮挡、光照和阴影；只是相机不把距离转换成屏幕缩放。",
+    "“把 FOV 调小和把正交高度调小完全等价。”不对。前者改变透视相机的视野角，远近大小关系仍存在；后者改变正交取景范围，远近物体的投影比例基本不变。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS：Camera 组件参考",
+      "url": "https://docs.cocos.com/creator/3.8/manual/zh/editor/components/camera.html"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS：Camera API",
+      "url": "https://docs.cocos.com/creator/3.8/api/zh/classes/component_camera.Camera.html"
+    }
+  ]
+}
