@@ -223,10 +223,6 @@ const openArticle = (report) => {
 };
 
 const render = () => {
-  const reports = filteredReports();
-  if (reports.length && !reports.some((report) => report.date === state.activeReport?.date) && state.tag !== "all") {
-    state.activeReport = reports[0];
-  }
   renderFilters();
   renderReports();
   syncView();
