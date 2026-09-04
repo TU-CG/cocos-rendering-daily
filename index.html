@@ -1,94 +1,59 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="面向零基础读者的每日 Cocos Creator 渲染入门文章。">
-    <title>每日 Cocos 渲染入门</title>
-    <link rel="preconnect" href="https://unpkg.com">
-    <link rel="stylesheet" href="assets/style.css">
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="shell header-inner">
-        <a class="brand" href="./" aria-label="每日 Cocos 渲染入门首页">
-          <span class="brand-mark" aria-hidden="true"><i data-lucide="layers-3"></i></span>
-          <span>
-            <strong>每日 Cocos 渲染入门</strong>
-            <small>Cocos Creator 3.x</small>
-          </span>
-        </a>
-        <a class="repo-link" href="https://github.com/TU-CG/cocos-rendering-daily" target="_blank" rel="noreferrer">
-          <i data-lucide="github" aria-hidden="true"></i><span>GitHub</span>
-        </a>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="面向零基础读者的每日 Cocos Creator 渲染入门文章。">
+  <title>每日 Cocos 渲染入门</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <aside class="rail" aria-label="文章分类">
+    <div class="rail-brand">分类</div>
+    <nav class="rail-nav" id="category-filters" aria-label="渲染主题分类"></nav>
+  </aside>
+
+  <div class="app">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">DAILY LEARNING NOTES</p>
+        <div>
+          <h1>把 Cocos 的画面<br>看得明白一些</h1>
+          <p class="hero-lede">每天一篇短文，从一块空场景如何变成屏幕上的像素开始，循序认识 Cocos Creator 的渲染系统。</p>
+        </div>
       </div>
+      <div class="hero-note">一次只学一个概念，先建立直觉，再回到编辑器动手验证。</div>
     </header>
 
-    <main>
-      <section class="intro-band">
-        <div class="shell intro-layout">
-          <div>
-            <p class="eyebrow">DAILY LEARNING NOTES</p>
-            <h1>把 Cocos 的画面<br>看得明白一些</h1>
-            <p class="lede">每天一篇短文，从一块空场景如何变成屏幕上的像素开始，循序认识 Cocos Creator 的渲染系统。</p>
+    <main class="content">
+      <section class="panel list-panel" id="list-panel">
+        <div class="panel-head">
+          <div class="panel-head-main">
+            <h2>文章列表</h2>
+            <p class="collapsed-title" id="collapsed-title"></p>
           </div>
-          <div class="reading-rule">
-            <i data-lucide="route" aria-hidden="true"></i>
-            <p>一次只学一个概念，先建立直觉，再回到编辑器动手验证。</p>
+          <div class="list-tools">
+            <label class="search-box">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input class="search-input" id="search-input" type="search" placeholder="搜索文章" aria-label="搜索文章">
+            </label>
+            <span class="report-count" id="report-count" aria-live="polite"></span>
+            <button class="list-toggle" id="list-toggle" type="button">继续阅读 ↑</button>
           </div>
+        </div>
+
+        <div class="report-list" id="report-list" aria-live="polite"></div>
+
+        <div class="pagination" id="pagination" aria-label="文章列表分页">
+          <button class="page-button" id="prev-page" type="button" aria-label="上一页" title="上一页">‹</button>
+          <span class="page-indicator">第 <input class="page-input" id="page-input" type="number" min="1" value="1" aria-label="跳转到页码"> / <span id="total-pages">1</span> 页</span>
+          <button class="page-button" id="next-page" type="button" aria-label="下一页" title="下一页">›</button>
         </div>
       </section>
 
-      <section class="filter-band" aria-label="文章分类">
-        <div class="shell">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">TOPICS</p>
-              <h2>按主题学习</h2>
-            </div>
-            <p id="report-count" class="report-count" aria-live="polite"></p>
-          </div>
-          <div id="category-filters" class="category-filters" role="tablist" aria-label="渲染主题分类"></div>
-        </div>
-      </section>
-
-      <section class="reports-band">
-        <div class="shell reports-layout">
-          <div>
-            <div class="section-heading compact-heading">
-              <div>
-                <p class="eyebrow">ARCHIVE</p>
-                <h2>每日文章</h2>
-              </div>
-            </div>
-            <div id="report-list" class="report-list" aria-live="polite"></div>
-          </div>
-          <aside class="learning-map" aria-label="学习路径">
-            <p class="eyebrow">LEARNING MAP</p>
-            <h2>先后顺序</h2>
-            <ol>
-              <li>看懂场景怎样进入屏幕</li>
-              <li>控制相机、UI 与画面素材</li>
-              <li>认识材质、状态与批处理</li>
-              <li>学习光照、后处理与性能定位</li>
-            </ol>
-          </aside>
-        </div>
-      </section>
-
-      <section id="article" class="article-band" hidden>
-        <div class="shell article-layout">
-          <a class="back-link" href="./"><i data-lucide="arrow-left" aria-hidden="true"></i>返回全部文章</a>
-          <article id="article-content"></article>
-        </div>
-      </section>
+      <article class="reader" id="article-content" hidden></article>
     </main>
-
-    <footer class="site-footer">
-      <div class="shell"><span>每日 Cocos 渲染入门</span><span>内容优先参考 Cocos Creator 官方资料</span></div>
-    </footer>
-
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="assets/app.js"></script>
-  </body>
+  </div>
+</body>
 </html>
