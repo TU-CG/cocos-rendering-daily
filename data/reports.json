@@ -62,140 +62,6 @@
                         "summary":  "用 Spot Light 的方向、内外锥角区分“光朝哪里”“中心有多亮”和“边缘如何变软”，把手电筒与舞台灯的照射边界变成可验证的设置。"
                     },
                     {
-                        "date":  "2026-09-05",
-                        "file":  "2026-09-05.json",
-                        "tags":  [
-                                     "lighting"
-                                 ],
-                        "title":  "灯泡照不到墙角：认识球形光源的 Range",
-                        "summary":  "用球形光源的 Range 区分“灯在哪里”“灯有多亮”和“灯能照多远”，让局部光照既符合画面意图也更容易控制。"
-                    },
-                    {
-                        "date":  "2026-09-04",
-                        "file":  "2026-09-04.json",
-                        "tags":  [
-                                     "performance",
-                                     "materials"
-                                 ],
-                        "title":  "改了一个材质，性能真的变了吗：用 Profiler 做 A/B 对比",
-                        "summary":  "用固定场景、单一变量和前后数据建立可复现的渲染性能对比，避免把一次偶然的卡顿误判成材质或批次问题。"
-                    },
-                    {
-                        "date":  "2026-09-03",
-                        "file":  "2026-09-03.json",
-                        "tags":  [
-                                     "camera-ui"
-                                 ],
-                        "title":  "不同手机为何总有一边空着：认识设计分辨率与屏幕适配",
-                        "summary":  "用 Canvas 的设计分辨率、Fit Width 与 Fit Height 建立屏幕适配的取舍，再用 Widget 让关键 UI 始终待在可见位置。"
-                    },
-                    {
-                        "date":  "2026-09-02",
-                        "file":  "2026-09-02.json",
-                        "tags":  [
-                                     "camera-ui"
-                                 ],
-                        "title":  "远近为何会变大小：认识相机的透视与正交投影",
-                        "summary":  "用两台相机观察透视与正交投影的差异，理解 3D 世界怎样被映射到屏幕并选择合适的相机模式。"
-                    },
-                    {
-                        "date":  "2026-09-01",
-                        "file":  "2026-09-01.json",
-                        "tags":  [
-                                     "post-processing",
-                                     "camera-ui"
-                                 ],
-                        "title":  "后处理应该交给谁：区分全局与单相机效果",
-                        "summary":  "用全局与单相机两种作用范围，避免 Bloom、色调映射等后处理意外影响 UI、预览或小地图相机。"
-                    },
-                    {
-                        "date":  "2026-08-31",
-                        "file":  "2026-08-31.json",
-                        "tags":  [
-                                     "textures",
-                                     "performance"
-                                 ],
-                        "title":  "纹理压缩不是把图片变小：理解 GPU 格式与平台选择",
-                        "summary":  "用一个可验证的构建练习，分清下载体积、显存占用与画质，学会在 Cocos Creator 3.8 为不同平台选择压缩纹理。"
-                    },
-                    {
-                        "date":  "2026-08-29",
-                        "file":  "2026-08-29.json",
-                        "tags":  [
-                                     "render-pipeline",
-                                     "performance"
-                                 ],
-                        "title":  "同一场景为何有两套画法：认识 Cocos 的渲染管线",
-                        "summary":  "用前向与延迟的直觉，理解渲染管线如何安排物体、光照和后处理，并学会在 3.8.x 判断项目使用哪套管线。"
-                    },
-                    {
-                        "date":  "2026-08-28",
-                        "file":  "2026-08-28.json",
-                        "tags":  [
-                                     "lighting",
-                                     "performance"
-                                 ],
-                        "title":  "阴影为何有锯齿或漂浮：认识阴影贴图分辨率与偏差",
-                        "summary":  "用 ShadowMapSize、PCF、Bias 与 Shadow Distance 解释阴影质量问题，并建立一套可重复的排查顺序。"
-                    },
-                    {
-                        "date":  "2026-08-27",
-                        "file":  "2026-08-27.json",
-                        "tags":  [
-                                     "render-pipeline",
-                                     "materials"
-                                 ],
-                        "title":  "半透明物体谁先画：认识 3D 渲染排序组件",
-                        "summary":  "用 Sorting Layer 和 Sorting Order 控制半透明 MeshRenderer 的绘制先后，排查物体互相遮挡的问题。"
-                    },
-                    {
-                        "date":  "2026-08-26",
-                        "file":  "2026-08-26.json",
-                        "tags":  [
-                                     "materials"
-                                 ],
-                        "title":  "模型表面的配方放在哪里：认识 MeshRenderer 的材质槽",
-                        "summary":  "从 MeshRenderer 的 Materials 槽位出发，弄清模型、材质资源与最终表面外观怎样准确对应。"
-                    },
-                    {
-                        "date":  "2026-08-25",
-                        "file":  "2026-08-25.json",
-                        "tags":  [
-                                     "materials"
-                                 ],
-                        "title":  "颜色是谁算出来的：第一次认识 Shader",
-                        "summary":  "把 Shader 理解为 GPU 上逐点执行的着色规则，分清它、Effect 与 Material 各自负责什么。"
-                    },
-                    {
-                        "date":  "2026-08-24",
-                        "file":  "2026-08-24.json",
-                        "tags":  [
-                                     "camera-ui"
-                                 ],
-                        "title":  "UI 为什么有时总在最上面：认识 Canvas 的 Render Mode",
-                        "summary":  "理解 Canvas 的 Overlay 与 Camera 渲染模式，排查 UI 明明存在却不显示、或与 3D 画面叠放不符合预期的问题。"
-                    },
-                    {
-                        "date":  "2026-08-23",
-                        "file":  "2026-08-23.json",
-                        "tags":  [
-                                     "camera-ui",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "两台相机为何互相盖住：认识 Camera Clear Flags",
-                        "summary":  "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。"
-                    },
-                    {
-                        "date":  "2026-08-22",
-                        "file":  "2026-08-22.json",
-                        "tags":  [
-                                     "camera-ui",
-                                     "render-pipeline"
-                                 ],
-                        "title":  "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
-                        "summary":  "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。"
-                    },
-                    {
                         "date":  "2026-08-21",
                         "file":  "2026-08-21.json",
                         "tags":  [
@@ -364,6 +230,140 @@
                                  ],
                         "title":  "从场景到屏幕：Cocos 怎样把节点变成画。",
                         "summary":  "先建立一张最重要的地图：场景里的节点并不会直接出现在屏幕上。"
+                    },
+                    {
+                        "date":  "2026-09-01",
+                        "file":  "2026-09-01.json",
+                        "tags":  [
+                                     "post-processing",
+                                     "camera-ui"
+                                 ],
+                        "title":  "后处理应该交给谁：区分全局与单相机效果",
+                        "summary":  "用全局与单相机两种作用范围，避免 Bloom、色调映射等后处理意外影响 UI、预览或小地图相机。"
+                    },
+                    {
+                        "date":  "2026-08-31",
+                        "file":  "2026-08-31.json",
+                        "tags":  [
+                                     "textures",
+                                     "performance"
+                                 ],
+                        "title":  "纹理压缩不是把图片变小：理解 GPU 格式与平台选择",
+                        "summary":  "用一个可验证的构建练习，分清下载体积、显存占用与画质，学会在 Cocos Creator 3.8 为不同平台选择压缩纹理。"
+                    },
+                    {
+                        "date":  "2026-08-29",
+                        "file":  "2026-08-29.json",
+                        "tags":  [
+                                     "render-pipeline",
+                                     "performance"
+                                 ],
+                        "title":  "同一场景为何有两套画法：认识 Cocos 的渲染管线",
+                        "summary":  "用前向与延迟的直觉，理解渲染管线如何安排物体、光照和后处理，并学会在 3.8.x 判断项目使用哪套管线。"
+                    },
+                    {
+                        "date":  "2026-09-02",
+                        "file":  "2026-09-02.json",
+                        "tags":  [
+                                     "camera-ui"
+                                 ],
+                        "title":  "远近为何会变大小：认识相机的透视与正交投影",
+                        "summary":  "用两台相机观察透视与正交投影的差异，理解 3D 世界怎样被映射到屏幕并选择合适的相机模式。"
+                    },
+                    {
+                        "date":  "2026-09-05",
+                        "file":  "2026-09-05.json",
+                        "tags":  [
+                                     "lighting"
+                                 ],
+                        "title":  "灯泡照不到墙角：认识球形光源的 Range",
+                        "summary":  "用球形光源的 Range 区分“灯在哪里”“灯有多亮”和“灯能照多远”，让局部光照既符合画面意图也更容易控制。"
+                    },
+                    {
+                        "date":  "2026-09-04",
+                        "file":  "2026-09-04.json",
+                        "tags":  [
+                                     "performance",
+                                     "materials"
+                                 ],
+                        "title":  "改了一个材质，性能真的变了吗：用 Profiler 做 A/B 对比",
+                        "summary":  "用固定场景、单一变量和前后数据建立可复现的渲染性能对比，避免把一次偶然的卡顿误判成材质或批次问题。"
+                    },
+                    {
+                        "date":  "2026-09-03",
+                        "file":  "2026-09-03.json",
+                        "tags":  [
+                                     "camera-ui"
+                                 ],
+                        "title":  "不同手机为何总有一边空着：认识设计分辨率与屏幕适配",
+                        "summary":  "用 Canvas 的设计分辨率、Fit Width 与 Fit Height 建立屏幕适配的取舍，再用 Widget 让关键 UI 始终待在可见位置。"
+                    },
+                    {
+                        "date":  "2026-08-24",
+                        "file":  "2026-08-24.json",
+                        "tags":  [
+                                     "camera-ui"
+                                 ],
+                        "title":  "UI 为什么有时总在最上面：认识 Canvas 的 Render Mode",
+                        "summary":  "理解 Canvas 的 Overlay 与 Camera 渲染模式，排查 UI 明明存在却不显示、或与 3D 画面叠放不符合预期的问题。"
+                    },
+                    {
+                        "date":  "2026-08-23",
+                        "file":  "2026-08-23.json",
+                        "tags":  [
+                                     "camera-ui",
+                                     "render-pipeline"
+                                 ],
+                        "title":  "两台相机为何互相盖住：认识 Camera Clear Flags",
+                        "summary":  "理解相机在每帧开始时怎样处理颜色和深度缓冲，排查背景被覆盖、叠加相机画面异常的问题。"
+                    },
+                    {
+                        "date":  "2026-08-22",
+                        "file":  "2026-08-22.json",
+                        "tags":  [
+                                     "camera-ui",
+                                     "render-pipeline"
+                                 ],
+                        "title":  "节点明明存在，为何这台相机看不见：认识 Layer 与 Visibility",
+                        "summary":  "用节点的 Layer 和相机的 Visibility 建立一条明确的可见性规则，排查“场景里有、游戏里没有”的第二类问题。"
+                    },
+                    {
+                        "date":  "2026-08-25",
+                        "file":  "2026-08-25.json",
+                        "tags":  [
+                                     "materials"
+                                 ],
+                        "title":  "颜色是谁算出来的：第一次认识 Shader",
+                        "summary":  "把 Shader 理解为 GPU 上逐点执行的着色规则，分清它、Effect 与 Material 各自负责什么。"
+                    },
+                    {
+                        "date":  "2026-08-28",
+                        "file":  "2026-08-28.json",
+                        "tags":  [
+                                     "lighting",
+                                     "performance"
+                                 ],
+                        "title":  "阴影为何有锯齿或漂浮：认识阴影贴图分辨率与偏差",
+                        "summary":  "用 ShadowMapSize、PCF、Bias 与 Shadow Distance 解释阴影质量问题，并建立一套可重复的排查顺序。"
+                    },
+                    {
+                        "date":  "2026-08-27",
+                        "file":  "2026-08-27.json",
+                        "tags":  [
+                                     "render-pipeline",
+                                     "materials"
+                                 ],
+                        "title":  "半透明物体谁先画：认识 3D 渲染排序组件",
+                        "summary":  "用 Sorting Layer 和 Sorting Order 控制半透明 MeshRenderer 的绘制先后，排查物体互相遮挡的问题。"
+                    },
+                    {
+                        "date":  "2026-08-26",
+                        "file":  "2026-08-26.json",
+                        "tags":  [
+                                     "materials"
+                                 ],
+                        "title":  "模型表面的配方放在哪里：认识 MeshRenderer 的材质槽",
+                        "summary":  "从 MeshRenderer 的 Materials 槽位出发，弄清模型、材质资源与最终表面外观怎样准确对应。"
                     }
                 ]
 }
