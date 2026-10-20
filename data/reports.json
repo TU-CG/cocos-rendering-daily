@@ -43,6 +43,16 @@
   ],
   "reports": [
     {
+      "date": "2026-10-20",
+      "file": "2026-10-20.json",
+      "tags": [
+        "post-processing",
+        "performance"
+      ],
+      "title": "斜边为何像台阶：认识 FXAA 抗锯齿",
+      "summary": "一个方块旋转后，笔直的边缘在屏幕上却像一段段台阶。本篇用两块白色方块，理解 FXAA 怎样缓和这种锯齿，以及为什么平滑不等于增加细节。适用 Creator 3.8.4 及以上的新 Builtin 管线，操作按 3.8.5 核验；标签：post-processing、performance。阅读、预测与练习合计约 20—25 分钟。"
+    },
+    {
       "date": "2026-10-19",
       "file": "2026-10-19.json",
       "tags": [
