@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-10",
+  "tags": [
+    "post-processing"
+  ],
+  "title": "画面已经画完还能改变吗：认识全屏后处理",
+  "summary": "把相机输出当成一张照片再处理，理解后处理的位置、开关和最小验证方法。",
+  "intuition": "把相机想成拍照设备。物体、灯光和背景已经被记录后，还可以对照片调亮高光、增加光晕或统一色调，这就是后处理（Post Process）。\n\n后处理读取相机已经得到的画面，对屏幕上的每个像素重新计算。它不会重新摆放物体，也不能让相机看见原本没有渲染的内容。\n\nBloom 会寻找超过亮度阈值的区域，把亮色向周围扩散；FXAA 会寻找边缘锯齿；Color Grading 会通过颜色查找表统一改变画面色调。",
+  "cocos": "本文适用于 Cocos Creator 3.8 LTS。官方文档说明，3.8.3 及更早版本、3.8.4 版本存在不同的后处理工作流，请以安装的小版本文档为准。\n\n在 3.8 的 Full-Screen Post Process 工作流中：\n\n1. 打开 Custom Pipeline，并切换到 Forward Render Pipeline。\n2. 在 Hierarchy 新建空节点，例如命名为 `PostProcess`。\n3. 在 Inspector 的 Add Component 中添加 Bloom。添加第一个后处理效果时，Cocos 会自动加入 `PostProcess` 组件。\n4. 选中 Camera，在 Camera 组件中勾选 `Use Post Process`。\n5. `PostProcess` 的 `Global` 开启时，所有启用后处理的相机都可以使用这组效果；关闭后，可将节点拖到某个 Camera 的 `PostProcess` 属性中，只作用于该相机。\n\nBloom 的 `Threshold` 是触发光晕的亮度阈值，`Intensity` 控制光晕明显程度，`Iterations` 越高通常越柔和，但也会增加处理成本。\n\n多个效果的执行顺序不是 Inspector 中的添加顺序，而是由引擎预先定义。因此初学时先只验证一个 Bloom。",
+  "exercise": "在 Cocos Creator 3.8 LTS 中新建 3D 空项目：\n\n1. 确认场景中有 Scene、Main Light 和 Camera，创建 Cube 与 Plane，让 Cube 悬在 Plane 上方，并调整 Camera 使两者可见。\n2. 按对应 3.8 小版本文档启用 Custom Pipeline 和 Forward Render Pipeline。\n3. 新建空节点 `PostProcess`，添加 Bloom，保持 `Global` 默认状态。\n4. 选中 Camera，勾选 `Use Post Process`。运行场景，逐步调整 Bloom 的 `Intensity` 或 `Threshold`。\n5. 比较三种状态：关闭 `Use Post Process`、开启但效果较弱、开启且效果明显。\n\n你应该看到 Cube 和 Plane 的位置、阴影方向都没有改变，但亮区域边缘出现柔和光晕。\n\n然后关闭 `Global`，清空 Camera 的 `PostProcess` 引用，效果通常会消失；重新绑定后，单相机效果恢复。这说明后处理属于相机输出链路，而不是 Cube 自带的效果。",
+  "misconceptions": [
+    "“后处理能让相机看到没有渲染的物体。”不对。它只能处理相机已经获得的结果图像。",
+    "“添加 Bloom 后所有相机会自动生效。”不一定。相机必须启用 `Use Post Process`，还要正确配置全局或单相机范围。",
+    "“Bloom 强度越高越真实。”不对。强度过大会掩盖细节，Iterations 也会增加处理成本。"
+  ],
+  "sources": [
+    {
+      "title": "Cocos Creator 3.8 LTS: Full-Screen Post Process",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/render-pipeline/post-process/"
+    },
+    {
+      "title": "Cocos Creator 3.8 LTS: Post-Processing Effects（版本差异说明）",
+      "url": "https://docs.cocos.com/creator/3.8/manual/en/render-pipeline/post-process.html"
+    }
+  ]
+}
