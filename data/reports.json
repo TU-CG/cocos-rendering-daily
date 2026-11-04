@@ -43,6 +43,17 @@
   ],
   "reports": [
     {
+      "date": "2026-11-04",
+      "file": "2026-11-04.json",
+      "tags": [
+        "performance",
+        "render-pipeline",
+        "lighting"
+      ],
+      "title": "颜色不对，从哪一步查起：认识渲染调试视图",
+      "summary": "红色方块看起来发黑，应该改材质，还是先检查灯光？本篇只学习渲染调试视图：把最终画面暂时换成某一项中间数据，用一次有对照的观察缩小排错范围。适用 Cocos Creator 3.8 LTS，菜单与内置标准材质实现核对至 3.8.5。标签：performance、render-pipeline、lighting。建议阅读与预测 12—15 分钟，编辑器练习 8—10 分钟，总计约 20—25 分钟。"
+    },
+    {
       "date": "2026-11-03",
       "file": "2026-11-03.json",
       "tags": [
